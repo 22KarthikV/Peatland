@@ -13,6 +13,9 @@ dependencies = [
     "typer>=0.27.3",
 ]
 
+[project.scripts]
+peatwatch-pipeline = "pipeline.cli:app"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
