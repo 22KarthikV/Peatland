@@ -181,7 +181,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_health.py`
   - Files: `api/pyproject.toml`, `api/src/api/{main,errors,settings}.py`, `api/Dockerfile`
   - Deps: CP1
-- [ ] **A2 Models, Alembic migration, PostGIS test fixture** | S | - | M
+- [x] **A2 Models, Alembic migration, PostGIS test fixture** | S | - | M
   - Accept: tables per contract; `alembic upgrade head` on empty DB; test fixture starts real PostGIS.
   - Verify: `uv run pytest api/tests/test_db.py`
   - Files: `api/src/api/db/{models,session}.py`, `api/alembic/*`, test
