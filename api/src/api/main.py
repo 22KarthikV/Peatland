@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from api.errors import register_error_handlers
+from api.routes import sites
 from api.security import RateLimiter
 from api.settings import Settings, get_settings
 
@@ -27,6 +28,8 @@ def create_app(settings: Settings | None = None, limiter: RateLimiter | None = N
     async def get_health() -> Health:
         """Liveness check for the load balancer (no auth)."""
         return Health(status="ok", version=VERSION)
+
+    app.include_router(sites.router)
 
     return app
 
