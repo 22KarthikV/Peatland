@@ -186,7 +186,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_db.py`
   - Files: `api/src/api/db/{models,session}.py`, `api/alembic/*`, test
   - Deps: A1
-- [ ] **A3 Sites endpoints with boundary validation** | S | - | M
+- [x] **A3 Sites endpoints with boundary validation** | S | - | M
   - Accept: `POST /sites`, `GET /sites`, `GET /sites/{id}`; rejects invalid polygon, outside region, over max area; 400s use error format.
   - Verify: `uv run pytest api/tests/test_sites.py`
   - Files: `api/src/api/routes/sites.py`, `validation.py`, schemas, test
