@@ -155,7 +155,7 @@ Verified against current Claude Code docs (sub-agents, context window, env vars,
 - Each agent has **its own context window** and returns only a short final report to the orchestrator. Long work stays out of the orchestrator's context.
 - **One task per agent run.** A fresh agent per task keeps context small; compaction is the safety net, not the plan.
 - **State lives in files, not memory:** `tasks/todo.md` (status), `tasks/handoffs/<task-id>.md` (what changed, how verified, what is next). A new agent reads the spec section and handoff, not the whole history.
-- **Auto-compact at 25%:** set `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=25` in the `env` block of project `.claude/settings.json`. Per the docs it applies to the main session and subagents, and it can only lower the default threshold. **[test]** the docs do not say which window the 25% is measured against, and do not confirm that `settings.json` env entries apply to this variable. Verify with `/context` during `foundation`. Subagent frontmatter `autoCompactWindow` has a 100,000-token minimum, so it cannot express 25% of a 200k window; the env variable is the control.
+- **Auto-compact at 25%:** set `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=25` in the `env` block of project `.claude/settings.json`. Per the docs it applies to the main session and subagents, and it can only lower the default threshold. **[test]** the docs do not say which window the 25% is measured against, and do not confirm that `settings.json` env entries apply to this variable. Verify with `/context` during `foundation`. **Result (fresh session, 2026-11-02, L1): not applied.** `.claude/settings.json` holds the entry, yet `get_usage` reports auto-compact at 97% of a 1,000,000-token window. Treat the env entry as ineffective in the desktop app; rely on one-task-per-agent and handoff files, and compact manually. Subagent frontmatter `autoCompactWindow` has a 100,000-token minimum, so it cannot express 25% of a 200k window; the env variable is the control.
 - Before a compaction, the agent writes its progress to its handoff file. **[test]** a `PreCompact` hook can prompt this; its input schema is not confirmed.
 
 ### Parallelism rules
@@ -191,7 +191,7 @@ Rules:
 1. Agent finishes: tests, lint and type-check pass inside its worktree; it writes the handoff file and returns a summary.
 2. Orchestrator reviews the diff (with `code-reviewer` for non-trivial changes), confirms only allowed paths changed, then merges the branch into `main` with a conventional commit referencing the task id.
 3. Orchestrator runs the full suite on `main`. If it fails, the merge is reverted and the task reopens.
-4. Docs are silent on how worktree branches are reported back, so the agent always states its branch name and worktree path in its report. **[test]**
+4. Docs are silent on how worktree branches are reported back, so the agent always states its branch name and worktree path in its report. **Confirmed in F5** (ADR 0002): agents report branch, path and commit. **Custom agents confirmed in a fresh session (2026-11-02):** all seven `.claude/agents/` definitions are listed.
 
 ### Parallel windows (from the build order)
 | Stage | Runs in parallel | Serial gate before it |

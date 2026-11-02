@@ -39,7 +39,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Deps: F1, F3, F4
 
 ### Labels chain (agent `labels`, no code)
-- [ ] **L1 Research candidate regions and label data** | S | A with F-chain | M
+- [x] **L1 Research candidate regions and label data** | S | A with F-chain | M
   - Do: shortlist 3 Scottish regions; for each: Sentinel-2 coverage and cloud, LiDAR/DEM availability, candidate label datasets (peatland condition, land cover, NFI woodland), licence and access, resolution/coarseness, example change events (felling, planting, fire, rewetting) with dates.
   - Accept: `docs/labels/candidates.md` with a comparison table and source links; claims marked verified or unverified.
   - Verify: orchestrator spot-checks 3 links/claims.
