@@ -120,3 +120,21 @@ def test_load_geometry_errors(tmp_path: Path) -> None:
         load_geometry({"type": "Point", "coordinates": [0, 0]})
     with pytest.raises(ValueError, match="no polygon"):
         load_geometry({"type": "FeatureCollection", "features": []})
+
+
+def test_boa_offset_flag_read_from_item() -> None:
+    scenes = search_scenes(GEOM, WINDOW, 40, client=FakeClient())
+    assert all(s.boa_offset_applied is True for s in scenes)
+
+
+@pytest.mark.parametrize("value", [False, None])
+def test_boa_offset_false_or_missing_is_false(value: object) -> None:
+    feats = _features()
+    if value is None:
+        del feats[0]["properties"]["earthsearch:boa_offset_applied"]
+    else:
+        feats[0]["properties"]["earthsearch:boa_offset_applied"] = value
+    scenes = search_scenes(GEOM, WINDOW, 40, client=FakeClient(feats))
+    flags = {s.id: s.boa_offset_applied for s in scenes}
+    assert flags[feats[0]["id"]] is False
+    assert flags[feats[1]["id"]] is True

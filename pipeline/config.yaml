@@ -1,0 +1,6 @@
+# Demo site: Glen Trool box [-4.55, 55.05, -4.30, 55.30] (about 16 km x 28 km).
+site: glen-trool
+boundary_path: sites/glen-trool.geojson
+window: {start: 2025-04-01, end: 2025-05-31}
+cloud_threshold: 40
+output_dir: out
