@@ -79,7 +79,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `openapi-spec-validator contracts/openapi.yaml`
   - Files: `contracts/db-schema.md`, `contracts/openapi.yaml`
   - Deps: C2
-- [ ] **C4 Queue message contract and mock fixtures** | S | - | M
+- [x] **C4 Queue message contract and mock fixtures** | S | - | M
   - Accept: SQS job message schema (kind, site, dates, run id, model); JSON fixtures for every endpoint response (for web and api mocks); sample tiny COG fixtures listed.
   - Verify: fixtures validate against `openapi.yaml`.
   - Files: `contracts/queue.schema.json`, `contracts/fixtures/*.json`
