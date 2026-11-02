@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
+from api.auth import hash_key
 from api.main import create_app
-from api.security import RateLimiter, enforce_rate_limit, hash_key
+from api.ratelimit import RateLimiter, enforce_rate_limit
 from api.settings import Settings
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient

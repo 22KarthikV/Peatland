@@ -1,7 +1,5 @@
-"""X-API-Key check and a simple in-memory per-key rate limiter (SPEC D7)."""
+"""Simple in-memory per-key rate limiter and the rate-limit dependency (SPEC D7)."""
 
-import hashlib
-import hmac
 import math
 import time
 from collections.abc import Callable
@@ -10,8 +8,8 @@ from typing import Annotated
 
 from fastapi import Depends, Request, Response
 
+from api.auth import SettingsDep, require_api_key
 from api.errors import ApiError
-from api.settings import Settings
 
 WINDOW_SECONDS = 60.0
 
@@ -23,17 +21,6 @@ JOB_ROUTES = frozenset(
         ("POST", "/sites/{site_id}/changes"),
     }
 )
-
-
-def hash_key(key: str) -> str:
-    return hashlib.sha256(key.encode()).hexdigest()
-
-
-def is_valid_key(key: str | None, allowed_hashes: frozenset[str]) -> bool:
-    if not key:
-        return False
-    digest = hash_key(key)
-    return any(hmac.compare_digest(digest, h) for h in allowed_hashes)
 
 
 @dataclass
@@ -55,26 +42,12 @@ class RateLimiter:
         return True, limit - count - 1, 0
 
 
-def _settings(request: Request) -> Settings:
-    settings: Settings = request.app.state.settings
-    return settings
-
-
 def _limiter(request: Request) -> RateLimiter:
     limiter: RateLimiter = request.app.state.rate_limiter
     return limiter
 
 
-SettingsDep = Annotated[Settings, Depends(_settings)]
 LimiterDep = Annotated[RateLimiter, Depends(_limiter)]
-
-
-async def require_api_key(request: Request, settings: SettingsDep) -> str:
-    """Return the hash of the presented key, or raise 401."""
-    key = request.headers.get("X-API-Key")
-    if key is None or not is_valid_key(key, settings.api_key_hashes):
-        raise ApiError(401, "unauthorized", "A valid X-API-Key header is required.")
-    return hash_key(key)
 
 
 async def enforce_rate_limit(

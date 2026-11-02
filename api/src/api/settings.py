@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     queue_name: str = "peatwatch-jobs"
     # Comma-separated SHA-256 hex digests of the accepted keys; never plain keys (openapi.yaml).
     api_keys: str = ""
+    # Optional Secrets Manager secret of comma-separated plaintext keys (hashed on load).
+    api_key_secret_id: str = ""
     rate_limit_job_per_minute: int = Field(default=10, ge=1)
     rate_limit_default_per_minute: int = Field(default=120, ge=1)
 

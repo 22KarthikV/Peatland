@@ -6,10 +6,10 @@ from collections.abc import Iterator
 from typing import Any
 
 import pytest
+from api.auth import hash_key
 from api.db.models import Classification, Composite
 from api.db.session import get_session
 from api.main import create_app
-from api.security import hash_key
 from api.settings import Settings
 from fastapi.testclient import TestClient
 from sqlalchemy import text
