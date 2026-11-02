@@ -164,7 +164,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_baseline_rf.py`
   - Files: `ml/src/ml/baseline_rf.py`, test
   - Deps: M4
-- [ ] **M6 Sliding-window inference and classification COG** | S | B | M
+- [x] **M6 Sliding-window inference and classification COG** | S | B | M
   - Accept: overlap-blended windows; uint8 classification COG with embedded colormap; blending test shows no edge seams; works with any model object (baseline first).
   - Verify: `uv run pytest ml/tests/test_inference.py`; `rio cogeo validate`
   - Files: `ml/src/ml/infer.py`, `cog.py`, test
