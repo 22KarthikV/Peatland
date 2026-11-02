@@ -196,7 +196,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_auth.py`
   - Files: `api/src/api/auth.py`, `ratelimit.py`, test
   - Deps: A3
-- [ ] **A5 Runs endpoints and enqueue** | S | - | M
+- [x] **A5 Runs endpoints and enqueue** | S | - | M
   - Accept: `POST /sites/{id}/runs` creates run and SQS message (LocalStack), returns run id; `GET /runs/{id}`.
   - Verify: `uv run pytest api/tests/test_runs.py`
   - Files: `api/src/api/routes/runs.py`, `queue.py`, test
