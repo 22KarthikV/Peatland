@@ -176,7 +176,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Deps: M6
 
 ### API (agent `api`)
-- [ ] **A1 App skeleton, health and error format** | S | - | M
+- [x] **A1 App skeleton, health and error format** | S | - | M
   - Accept: FastAPI app, `GET /health`, uniform error handler, settings from env, Dockerfile, OpenAPI served and matching `contracts/openapi.yaml` for implemented routes.
   - Verify: `uv run pytest api/tests/test_health.py`
   - Files: `api/pyproject.toml`, `api/src/api/{main,errors,settings}.py`, `api/Dockerfile`
