@@ -1,0 +1,7 @@
+{
+  "code": "not_found",
+  "message": "Site not found.",
+  "detail": {
+    "site_id": "3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12"
+  }
+}

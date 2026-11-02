@@ -1,0 +1,8 @@
+{
+  "code": "boundary_too_large",
+  "message": "The boundary is 82 140 ha; the maximum is 50 000 ha.",
+  "detail": {
+    "area_ha": 82140.0,
+    "max_area_ha": 50000.0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "code": "classification_missing",
+  "message": "No unet-1.0.0 classification exists for 2025-w20250408-20250408. Run a classification for that date first.",
+  "detail": {
+    "year": 2025,
+    "season": "w20250408-20250408",
+    "model": "unet-1.0.0"
+  }
+}

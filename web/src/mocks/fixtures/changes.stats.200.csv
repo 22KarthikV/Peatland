@@ -1,0 +1,7 @@
+from_class_id,from_class,to_class_id,to_class,area_ha,percent
+0,other,0,other,520.10,7.99
+1,bog,1,bog,3730.60,57.28
+1,bog,3,felled_or_burnt_bare,479.70,7.37
+2,woodland,2,woodland,1350.10,20.73
+2,woodland,3,felled_or_burnt_bare,30.10,0.46
+3,felled_or_burnt_bare,3,felled_or_burnt_bare,401.80,6.17

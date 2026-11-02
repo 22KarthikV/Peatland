@@ -1,0 +1,40 @@
+{
+  "contract_version": 1,
+  "kind": "change",
+  "run_id": "29fdeb0f-a31c-4780-be29-84f06f7192a1",
+  "site": {
+    "id": "3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12",
+    "slug": "glen-trool"
+  },
+  "windows": [
+    {
+      "year": 2025,
+      "season": "w20250319-20250319",
+      "start": "2025-03-19",
+      "end": "2025-03-19"
+    },
+    {
+      "year": 2025,
+      "season": "w20250408-20250408",
+      "start": "2025-04-08",
+      "end": "2025-04-08"
+    }
+  ],
+  "model": {
+    "name": "unet",
+    "version": "1.0.0"
+  },
+  "params": {
+    "from": {
+      "year": 2025,
+      "season": "w20250319-20250319"
+    },
+    "to": {
+      "year": 2025,
+      "season": "w20250408-20250408"
+    },
+    "model": "unet-1.0.0"
+  },
+  "idempotency_key": "abc39f35d829c5dbeb045bd8877f8db35d63756181268ff27986061a8452dcc3",
+  "enqueued_at": "2026-11-02T09:20:00Z"
+}
