@@ -1,0 +1,7 @@
+{
+  "code": "rate_limited",
+  "message": "Too many requests; retry after 12 seconds.",
+  "detail": {
+    "retry_after": 12
+  }
+}
