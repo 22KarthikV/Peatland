@@ -13,9 +13,11 @@ from sqlalchemy.dialects.postgresql import distinct_on
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from api.auth import SettingsDep
 from api.db.models import Classification, Composite, Model, Run, Site
 from api.db.session import get_session
 from api.errors import ApiError
+from api.ratelimit import enforce_rate_limit
 from api.schemas import (
     AvailableWindow,
     RunSummary,
@@ -24,7 +26,6 @@ from api.schemas import (
     SitePage,
     SiteSummary,
 )
-from api.security import SettingsDep, enforce_rate_limit
 from api.validation import (
     check_region_and_area,
     is_valid_slug,
