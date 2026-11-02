@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peatwatch.local/schemas/handlabel.schema.json",
+  "title": "PeatWatch hand-label FeatureCollection",
+  "description": "Hand-labelled validation polygons (task L3). Coordinates are WGS84 lon/lat (EPSG:4326). Copy the template to data/labels/handlabel.geojson to label.",
+  "type": "object",
+  "required": ["type", "features"],
+  "properties": {
+    "type": { "const": "FeatureCollection" },
+    "features": { "type": "array", "items": { "$ref": "#/$defs/feature" } }
+  },
+  "$defs": {
+    "feature": {
+      "type": "object",
+      "required": ["type", "geometry", "properties"],
+      "properties": {
+        "type": { "const": "Feature" },
+        "geometry": {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": { "type": { "enum": ["Polygon", "MultiPolygon"] } }
+        },
+        "properties": {
+          "type": "object",
+          "required": ["class", "label_date", "confidence", "source", "labeller"],
+          "additionalProperties": false,
+          "properties": {
+            "class": {
+              "enum": ["bog", "woodland", "felled_or_burnt_bare", "other"],
+              "description": "Land cover class at label_date."
+            },
+            "label_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "ISO date of the Sentinel-2 scene the label describes."
+            },
+            "confidence": {
+              "enum": ["high", "medium", "low"],
+              "description": "Labeller certainty. Only high and medium are used for scoring."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Imagery used, e.g. 'S2 2025-04-08 + aerial basemap'."
+            },
+            "labeller": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Initials or handle of the person who drew the polygon."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Optional free text."
+            }
+          }
+        }
+      }
+    }
+  }
+}
