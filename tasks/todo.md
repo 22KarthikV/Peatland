@@ -218,7 +218,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Deps: A1, P7
 
 ### Web (agent `web`)
-- [ ] **W1 Skeleton, typed API client and mock server** | S | A with API/ML tasks | M
+- [x] **W1 Skeleton, typed API client and mock server** | S | A with API/ML tasks | M
   - Accept: Vite + React + TS strict; ESLint; Vitest; API client generated from `openapi.yaml`; MSW serves `contracts/fixtures`; Dockerfile.
   - Verify: `npm --prefix web run lint ; npm --prefix web run typecheck ; npm --prefix web test`
   - Files: `web/*` config, `web/src/api/*`, `web/src/mocks/*`
