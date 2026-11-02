@@ -1,0 +1,16 @@
+{
+  "code": "validation_error",
+  "message": "Request body is invalid.",
+  "detail": [
+    {
+      "loc": [
+        "body",
+        "windows",
+        0,
+        "end"
+      ],
+      "msg": "end must not be before start",
+      "type": "value_error"
+    }
+  ]
+}

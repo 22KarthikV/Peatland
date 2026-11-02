@@ -1,0 +1,43 @@
+{
+  "contract_version": 1,
+  "kind": "pipeline",
+  "run_id": "f6cab8dc-70e9-445d-8bf6-51cd3c4e6f78",
+  "site": {
+    "id": "3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12",
+    "slug": "glen-trool"
+  },
+  "windows": [
+    {
+      "year": 2025,
+      "season": "w20250319-20250319",
+      "start": "2025-03-19",
+      "end": "2025-03-19"
+    },
+    {
+      "year": 2025,
+      "season": "w20250408-20250408",
+      "start": "2025-04-08",
+      "end": "2025-04-08"
+    }
+  ],
+  "model": {
+    "name": "unet",
+    "version": "1.0.0"
+  },
+  "params": {
+    "windows": [
+      {
+        "start": "2025-03-19",
+        "end": "2025-03-19"
+      },
+      {
+        "start": "2025-04-08",
+        "end": "2025-04-08"
+      }
+    ],
+    "model": "unet-1.0.0",
+    "max_cloud_cover_pct": 60
+  },
+  "idempotency_key": "f3c8693b5d3b2e3509ad8fff3a6d772fe4501771a4475d5d0b992d149229b60c",
+  "enqueued_at": "2026-11-02T09:20:00Z"
+}

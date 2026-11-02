@@ -1,0 +1,7 @@
+{
+  "code": "conflict",
+  "message": "A site with slug glen-trool already exists. Choose a different slug.",
+  "detail": {
+    "slug": "glen-trool"
+  }
+}

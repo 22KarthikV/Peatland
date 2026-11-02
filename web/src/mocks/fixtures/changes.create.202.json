@@ -1,0 +1,32 @@
+{
+  "id": "29fdeb0f-a31c-4780-be29-84f06f7192a1",
+  "kind": "change",
+  "status": "queued",
+  "created_at": "2026-11-02T10:10:00Z",
+  "finished_at": null,
+  "site_id": "3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12",
+  "model": {
+    "id": "7b2e9d34-5c18-4a6f-8e03-91d4f6a2c5b8",
+    "name": "unet",
+    "version": "1.0.0"
+  },
+  "params": {
+    "from": {
+      "year": 2025,
+      "season": "w20250319-20250319"
+    },
+    "to": {
+      "year": 2025,
+      "season": "w20250408-20250408"
+    },
+    "model": "unet-1.0.0"
+  },
+  "progress": {},
+  "outputs": {
+    "composite_ids": [],
+    "classification_ids": [],
+    "change_id": null
+  },
+  "error": null,
+  "started_at": null
+}
