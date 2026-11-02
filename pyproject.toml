@@ -6,3 +6,24 @@ requires-python = ">=3.13,<3.14"
 
 [tool.uv.workspace]
 members = ["pipeline", "ml", "api"]
+
+[dependency-groups]
+dev = ["ruff>=0.8", "mypy>=1.13", "pytest>=8.3", "pytest-cov>=6.0"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = [".claude"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+explicit_package_bases = true
+mypy_path = ["pipeline/src", "ml/src", "api/src"]
+
+[tool.pytest.ini_options]
+testpaths = ["pipeline/tests", "ml/tests", "api/tests"]
+addopts = "--cov=pipeline --cov=ml --cov=api --cov-report=term-missing"

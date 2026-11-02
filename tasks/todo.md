@@ -19,7 +19,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `docker compose up -d` then `docker compose ps` all healthy; script `scripts/smoke_stack.sh` passes.
   - Files: `docker-compose.yml`, `infra/localstack/init.sh`, `scripts/smoke_stack.sh`, ADR
   - Deps: F1
-- [ ] **F3 Quality tooling and CI skeleton** | S | A with F4 | M
+- [x] **F3 Quality tooling and CI skeleton** | S | A with F4 | M
   - Do: ruff, mypy, pytest + coverage config; GitHub Actions workflow running lint, type-check, tests on PR; one placeholder test per package. (h) create GitHub remote.
   - Accept: local lint/type/test pass; workflow file valid.
   - Verify: `uv run ruff check . ; uv run mypy pipeline ml api ; uv run pytest`; `actionlint` or push and see green run.
