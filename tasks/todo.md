@@ -101,7 +101,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline/tests/test_features.py`
   - Files: `pipeline/src/pipeline/features.py`, test
   - Deps: P1
-- [ ] **P3 Cloud, shadow and snow mask** | S | B | S
+- [x] **P3 Cloud, shadow and snow mask** | S | B | S
   - Accept: SCL-based mask function; tests with synthetic SCL arrays for each class.
   - Verify: `uv run pytest pipeline/tests/test_mask.py`
   - Files: `pipeline/src/pipeline/mask.py`, test

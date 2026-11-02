@@ -22,7 +22,7 @@ from collections.abc import Iterable
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy import ndimage  # type: ignore[import-untyped]  # no scipy-stubs dependency yet
+from scipy import ndimage  # no scipy-stubs dependency yet
 
 SCL_NO_DATA = 0
 SCL_SATURATED = 1
