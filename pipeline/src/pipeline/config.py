@@ -6,7 +6,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]  # types-PyYAML not in lock; see handoff
+import yaml  # types-PyYAML not in lock; see handoff
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SITE_PATTERN = r"^[a-z0-9][a-z0-9-]{1,62}$"

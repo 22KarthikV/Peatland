@@ -91,7 +91,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
 ---
 ## Stage 2: Pipeline (agent `pipeline`)
 
-- [ ] **P1 Package skeleton, CLI and config** | S | - | M
+- [x] **P1 Package skeleton, CLI and config** | S | - | M
   - Accept: `peatwatch-pipeline run --help`; YAML config loaded into a Pydantic model; structured run log writes scene ids, versions, parameters.
   - Verify: `uv run pytest pipeline -k "config or cli"`
   - Files: `pipeline/pyproject.toml`, `pipeline/src/pipeline/{cli,config,log}.py`, tests
