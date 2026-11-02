@@ -1,0 +1,26 @@
+# Band and feature order for composites (float32). Index in `bands` is the 1-based raster band minus 1.
+version: 1
+dtype: float32
+nodata: .nan
+sentinel2_l2a:
+  scale: 0.0001          # DN to surface reflectance
+  bands:                 # 12 bands in L2A (no B10)
+    - {name: B01, wavelength_nm: 443,  resolution_m: 60}
+    - {name: B02, wavelength_nm: 490,  resolution_m: 10}
+    - {name: B03, wavelength_nm: 560,  resolution_m: 10}
+    - {name: B04, wavelength_nm: 665,  resolution_m: 10}
+    - {name: B05, wavelength_nm: 705,  resolution_m: 20}
+    - {name: B06, wavelength_nm: 740,  resolution_m: 20}
+    - {name: B07, wavelength_nm: 783,  resolution_m: 20}
+    - {name: B08, wavelength_nm: 842,  resolution_m: 10}
+    - {name: B8A, wavelength_nm: 865,  resolution_m: 20}
+    - {name: B09, wavelength_nm: 945,  resolution_m: 60}
+    - {name: B11, wavelength_nm: 1610, resolution_m: 20}
+    - {name: B12, wavelength_nm: 2190, resolution_m: 20}
+features:                # appended after the 12 bands, in this order
+  - {name: ndvi, formula: "(B08-B04)/(B08+B04)", unit: index, range: [-1, 1]}
+  - {name: ndwi, formula: "(B03-B08)/(B03+B08)", unit: index, range: [-1, 1]}
+  - {name: ndmi, formula: "(B08-B11)/(B08+B11)", unit: index, range: [-1, 1]}
+  - {name: elevation, source: copernicus_glo30, unit: m}
+  - {name: slope, source: elevation, unit: degrees, range: [0, 90]}
+  - {name: twi, source: elevation, unit: index, note: topographic wetness proxy}

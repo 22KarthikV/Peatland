@@ -64,7 +64,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
 ---
 ## Stage 1: Contracts (orchestrator, serial)
 
-- [ ] **C1 Class list, colormap, band and feature order** | S | - | S
+- [x] **C1 Class list, colormap, band and feature order** | S | - | S
   - Accept: `contracts/classes.yaml` (ids, names, colour-blind-safe hex, nodata value), `contracts/bands.yaml` (12 S2 bands + features, order, units); a validator test.
   - Verify: `uv run pytest contracts`
   - Files: `contracts/classes.yaml`, `contracts/bands.yaml`, `contracts/tests/test_contracts.py`

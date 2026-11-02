@@ -1,0 +1,10 @@
+# Class list for classification COGs (uint8). Source of truth for pipeline, ml, api and web.
+# Colours are from the Okabe-Ito colour-blind-safe palette.
+version: 1
+nodata: 255
+classes:
+  - {id: 0, name: other, label: Other, hex: "#999999"}
+  - {id: 1, name: bog, label: Bog (peatland), hex: "#0072B2"}
+  - {id: 2, name: woodland, label: Woodland, hex: "#009E73"}
+  - {id: 3, name: felled_or_burnt_bare, label: Felled or burnt-bare, hex: "#D55E00"}
+# Optional later class, only if hand labels (L3) support it: degraded_peat (id 4, hex "#E69F00").
