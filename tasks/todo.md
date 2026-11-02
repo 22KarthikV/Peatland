@@ -25,7 +25,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run ruff check . ; uv run mypy pipeline ml api ; uv run pytest`; `actionlint` or push and see green run.
   - Files: `.github/workflows/ci.yml`, `pyproject.toml` (ruff/mypy/pytest sections), placeholder tests
   - Deps: F1
-- [ ] **F4 Agent definitions and settings** | S | A with F3 | M
+- [x] **F4 Agent definitions and settings** | S | A with F3 | M
   - Do: `.claude/agents/{pipeline,ml,api,web,infra,docs-demo}.md` (narrow prompt, tools, `model`, `effort`, `maxTurns`, path allow-list, report under 200 words); `.claude/settings.json` env `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=25`; handoff template `tasks/handoffs/TEMPLATE.md`. (h) approve the settings change.
   - Accept: six agent files parse; settings valid JSON; template exists.
   - Verify: list agents in the app shows all six; `python -m json.tool .claude/settings.json`.
