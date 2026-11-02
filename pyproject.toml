@@ -16,6 +16,7 @@ dev = [
     "openapi-spec-validator>=0.9.0",
     "types-pyyaml>=6.0.12.20261030",
     "scipy-stubs>=1.18.1.1",
+    "httpx>=0.28.1",
 ]
 
 [tool.ruff]
@@ -34,8 +35,9 @@ mypy_path = ["pipeline/src", "ml/src", "api/src"]
 
 [tool.pytest.ini_options]
 testpaths = ["pipeline/tests", "ml/tests", "api/tests", "contracts/tests"]
+markers = ["localstack: needs the docker-compose stack and RUN_LOCALSTACK=1"]
 addopts = "--cov=pipeline --cov=ml --cov=api --cov-report=term-missing"
 
 [[tool.mypy.overrides]]
-module = ["rasterio", "rasterio.*"]
+module = ["rasterio", "rasterio.*", "boto3", "boto3.*", "botocore", "botocore.*"]
 ignore_missing_imports = true

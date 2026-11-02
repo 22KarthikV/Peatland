@@ -4,6 +4,8 @@ version = "0.0.0"
 description = "PeatWatch pipeline package"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "boto3>=1.43.123",
+    "jsonschema>=4.26.0",
     "numpy>=2.5.4",
     "pydantic>=2.14.2",
     "pystac-client>=0.9.1",

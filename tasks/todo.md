@@ -121,7 +121,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline/tests/test_elevation.py`
   - Files: `pipeline/src/pipeline/elevation.py`, test, fixture
   - Deps: P2
-- [ ] **P7 COG writer, sidecar and idempotency** | S | - | M
+- [x] **P7 COG writer, sidecar and idempotency** | S | - | M
   - Accept: writes valid COG with band names; sidecar validates against contract; same config rerun skips and yields identical hash; uploads to LocalStack S3.
   - Verify: `uv run pytest pipeline/tests/test_output.py`; `rio cogeo validate` on output.
   - Files: `pipeline/src/pipeline/output.py`, `store.py`, test
