@@ -169,7 +169,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_inference.py`; `rio cogeo validate`
   - Files: `ml/src/ml/infer.py`, `cog.py`, test
   - Deps: M4
-- [ ] **M7 Change detection and statistics** | S | - | M
+- [x] **M7 Change detection and statistics** | S | - | M
   - Accept: transition matrix, change COG, hectares and percent per transition, CSV/JSON output; known-input test.
   - Verify: `uv run pytest ml/tests/test_change.py`
   - Files: `ml/src/ml/change.py`, `stats.py`, test
