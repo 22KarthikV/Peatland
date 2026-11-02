@@ -12,9 +12,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from rasterio.crs import CRS  # type: ignore[import-untyped]
-from rasterio.transform import Affine  # type: ignore[import-untyped]
-from rasterio.warp import transform as warp_transform  # type: ignore[import-untyped]
+from rasterio.crs import CRS
+from rasterio.transform import Affine
+from rasterio.warp import transform as warp_transform
 
 TARGET_CRS = CRS.from_epsg(32630)
 RESOLUTION_M = 10.0

@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import rasterio  # type: ignore[import-untyped]
+import rasterio
 import yaml
 from numpy.typing import NDArray
-from rasterio.enums import Resampling  # type: ignore[import-untyped]
-from rasterio.warp import reproject  # type: ignore[import-untyped]
+from rasterio.enums import Resampling
+from rasterio.warp import reproject
 
 from pipeline.grid import Grid
 from pipeline.mask import valid_mask

@@ -35,3 +35,7 @@ mypy_path = ["pipeline/src", "ml/src", "api/src"]
 [tool.pytest.ini_options]
 testpaths = ["pipeline/tests", "ml/tests", "api/tests", "contracts/tests"]
 addopts = "--cov=pipeline --cov=ml --cov=api --cov-report=term-missing"
+
+[[tool.mypy.overrides]]
+module = ["rasterio", "rasterio.*"]
+ignore_missing_imports = true

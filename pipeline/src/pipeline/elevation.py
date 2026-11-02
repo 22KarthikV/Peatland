@@ -22,12 +22,12 @@ from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-import rasterio  # type: ignore[import-untyped]
+import rasterio
 from affine import Affine
-from rasterio.crs import CRS  # type: ignore[import-untyped]
-from rasterio.enums import Resampling  # type: ignore[import-untyped]
-from rasterio.transform import array_bounds  # type: ignore[import-untyped]
-from rasterio.warp import reproject, transform_bounds  # type: ignore[import-untyped]
+from rasterio.crs import CRS
+from rasterio.enums import Resampling
+from rasterio.transform import array_bounds
+from rasterio.warp import reproject, transform_bounds
 
 from pipeline.features import slope_degrees, twi_proxy
 from pipeline.stac import EARTH_SEARCH_URL, StacClient

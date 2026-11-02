@@ -116,7 +116,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline/tests/test_composite.py`
   - Files: `pipeline/src/pipeline/composite.py`, `grid.py`, test
   - Deps: P3
-- [ ] **P6 Elevation ingestion** | S | C | M
+- [x] **P6 Elevation ingestion** | S | C | M
   - Accept: Copernicus DEM (and LiDAR if L1 found it) resampled to grid; slope and TWI derived via P2.
   - Verify: `uv run pytest pipeline/tests/test_elevation.py`
   - Files: `pipeline/src/pipeline/elevation.py`, test, fixture
