@@ -191,7 +191,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_sites.py`
   - Files: `api/src/api/routes/sites.py`, `validation.py`, schemas, test
   - Deps: A2
-- [ ] **A4 API key and rate limit** | S | - | S
+- [x] **A4 API key and rate limit** | S | - | S
   - Accept: key checked via header (hash stored); 401 without; 429 over limit; keys from env/Secrets Manager.
   - Verify: `uv run pytest api/tests/test_auth.py`
   - Files: `api/src/api/auth.py`, `ratelimit.py`, test
