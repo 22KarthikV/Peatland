@@ -1,18 +1,21 @@
 """Sites endpoints against a real PostGIS (fixtures from test_db.py; skipped if unreachable)."""
 
 import datetime as dt
+import hashlib
+import json
 import uuid
 from collections.abc import Iterator
 from typing import Any
 
 import pytest
 from api.auth import hash_key
-from api.db.models import Classification, Composite
+from api.db.models import Classification, Composite, Site
 from api.db.session import get_session
 from api.main import create_app
 from api.settings import Settings
+from api.storage import InMemoryObjectStore, get_storage
 from fastapi.testclient import TestClient
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from test_db import conn, db_url, engine, make_composite, make_model, make_run, session, sha  # noqa: F401
 
@@ -31,9 +34,15 @@ def box(w: float, s: float, e: float, n: float) -> dict[str, Any]:
 
 
 @pytest.fixture
-def client(session: Session) -> Iterator[TestClient]:  # noqa: F811
+def store() -> InMemoryObjectStore:
+    return InMemoryObjectStore()
+
+
+@pytest.fixture
+def client(session: Session, store: InMemoryObjectStore) -> Iterator[TestClient]:  # noqa: F811
     app = create_app(Settings(api_keys=hash_key(KEY)))
     app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_storage] = lambda: store
     yield TestClient(app)
 
 
@@ -63,6 +72,34 @@ def test_create_polygon_promoted_to_multipolygon(client: TestClient) -> None:
     got = client.get(f"/sites/{body['id']}", headers=H)
     assert got.status_code == 200
     assert got.json() == body
+
+
+def test_boundary_object_hash_matches_site(
+    client: TestClient,
+    store: InMemoryObjectStore,
+    session: Session,  # noqa: F811
+) -> None:
+    r = create(client, slug="hash-check")
+    assert r.status_code == 201
+    site = session.get(Site, uuid.UUID(r.json()["id"]))
+    assert site is not None
+    assert site.boundary_uri == "s3://peatwatch-data/sites/hash-check/boundary.geojson"
+    data = store.objects[("peatwatch-data", "sites/hash-check/boundary.geojson")]
+    assert hashlib.sha256(data).hexdigest() == site.boundary_sha256
+    assert json.loads(data)["type"] == "MultiPolygon"
+
+
+def test_upload_failure_creates_no_site(
+    client: TestClient,
+    store: InMemoryObjectStore,
+    session: Session,  # noqa: F811
+) -> None:
+    store.fail = True
+    r = create(client, slug="no-upload")
+    assert r.status_code == 503
+    assert session.scalar(select(Site).where(Site.slug == "no-upload")) is None
+    store.fail = False
+    assert create(client, slug="no-upload").status_code == 201
 
 
 def test_create_slug_derived_from_name(client: TestClient) -> None:

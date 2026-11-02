@@ -26,6 +26,7 @@ from api.schemas import (
     SitePage,
     SiteSummary,
 )
+from api.storage import StorageDep
 from api.validation import (
     check_region_and_area,
     is_valid_slug,
@@ -127,6 +128,7 @@ def create_site(
     response: Response,
     session: SessionDep,
     settings: SettingsDep,
+    storage: StorageDep,
 ) -> SiteDetail:
     geom = parse_boundary(body.boundary)
     check_region_and_area(session, geom)
@@ -148,13 +150,14 @@ def create_site(
         )
 
     # SHA-256 of the GeoJSON bytes that belong at boundary_uri (cog-layout.md section 2).
-    geojson = json.dumps(_boundary_json(geom), separators=(",", ":"), sort_keys=True)
+    geojson = json.dumps(_boundary_json(geom), separators=(",", ":"), sort_keys=True).encode()
+    key = f"sites/{slug}/boundary.geojson"
     site = Site(
         slug=slug,
         name=body.name,
         boundary=func.ST_Multi(func.ST_GeomFromText(geom.wkt, 4326)),
-        boundary_sha256=hashlib.sha256(geojson.encode()).hexdigest(),
-        boundary_uri=f"s3://{settings.data_bucket}/sites/{slug}/boundary.geojson",
+        boundary_sha256=hashlib.sha256(geojson).hexdigest(),
+        boundary_uri=f"s3://{settings.data_bucket}/{key}",
     )
     session.add(site)
     try:
@@ -169,6 +172,13 @@ def create_site(
                 {"slug": slug},
             ) from exc
         raise
+    try:
+        storage.put(settings.data_bucket, key, geojson, "application/geo+json")
+    except Exception as exc:
+        session.rollback()
+        raise ApiError(
+            503, "storage_unavailable", "The boundary could not be stored. Try again."
+        ) from exc
     session.refresh(site)
     session.commit()
     response.headers["Location"] = str(request.url_for("get_site", site_id=site.id))

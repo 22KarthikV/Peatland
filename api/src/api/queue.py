@@ -5,6 +5,7 @@ the queue through the `get_queue` dependency, which tests override.
 """
 
 import json
+from dataclasses import dataclass
 from functools import cached_property
 from typing import Annotated, Any, Protocol
 
@@ -19,6 +20,23 @@ class JobQueue(Protocol):
         ...
 
 
+@dataclass(frozen=True)
+class QueueMessage:
+    """One received message: opaque receipt handle, raw body, and SQS ApproximateReceiveCount."""
+
+    receipt: str
+    body: str
+    receive_count: int
+
+
+class JobConsumer(Protocol):
+    def receive(self, wait_seconds: int, max_messages: int = 1) -> list[QueueMessage]: ...
+
+    def delete(self, message: QueueMessage) -> None: ...
+
+    def extend_visibility(self, message: QueueMessage, seconds: int) -> None: ...
+
+
 def encode(body: dict[str, Any]) -> str:
     return json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
@@ -26,14 +44,55 @@ def encode(body: dict[str, Any]) -> str:
 class InMemoryJobQueue:
     """Test double: records bodies; set `fail` to simulate a send error."""
 
+    MAX_RECEIVE_COUNT = 3  # redrive policy (contracts/queue.md)
+
     def __init__(self) -> None:
         self.messages: list[dict[str, Any]] = []
         self.fail = False
+        self.pending: list[QueueMessage] = []
+        self.in_flight: dict[str, QueueMessage] = {}
+        self.dlq: list[QueueMessage] = []
+        self.deleted: list[str] = []
+        self.visibility_extensions: list[tuple[str, int]] = []
+        self._counter = 0
+
+    def _enqueue(self, body: str, receive_count: int = 0) -> None:
+        self._counter += 1
+        self.pending.append(QueueMessage(f"rh-{self._counter}", body, receive_count))
+
+    def send_raw(self, body: str) -> None:
+        """Test helper: put an arbitrary (possibly invalid) body on the queue."""
+        self._enqueue(body)
+
+    def expire_visibility(self) -> None:
+        """Test helper: in-flight messages become visible again (a crash or timeout)."""
+        self.pending.extend(self.in_flight.values())
+        self.in_flight.clear()
+
+    def receive(self, wait_seconds: int, max_messages: int = 1) -> list[QueueMessage]:
+        out: list[QueueMessage] = []
+        while self.pending and len(out) < max_messages:
+            m = self.pending.pop(0)
+            if m.receive_count >= self.MAX_RECEIVE_COUNT:
+                self.dlq.append(m)
+                continue
+            got = QueueMessage(m.receipt, m.body, m.receive_count + 1)
+            self.in_flight[got.receipt] = got
+            out.append(got)
+        return out
+
+    def delete(self, message: QueueMessage) -> None:
+        self.in_flight.pop(message.receipt, None)
+        self.deleted.append(message.receipt)
+
+    def extend_visibility(self, message: QueueMessage, seconds: int) -> None:
+        self.visibility_extensions.append((message.receipt, seconds))
 
     def send(self, body: dict[str, Any]) -> None:
         if self.fail:
             raise RuntimeError("simulated SQS failure")
         self.messages.append(json.loads(encode(body)))
+        self._enqueue(encode(body))
 
 
 class SqsJobQueue:
@@ -56,6 +115,30 @@ class SqsJobQueue:
 
     def send(self, body: dict[str, Any]) -> None:
         self._client.send_message(QueueUrl=self._url, MessageBody=encode(body))
+
+    def receive(self, wait_seconds: int, max_messages: int = 1) -> list[QueueMessage]:
+        resp = self._client.receive_message(
+            QueueUrl=self._url,
+            MaxNumberOfMessages=max_messages,
+            WaitTimeSeconds=wait_seconds,
+            AttributeNames=["ApproximateReceiveCount"],
+        )
+        return [
+            QueueMessage(
+                m["ReceiptHandle"],
+                m["Body"],
+                int(m.get("Attributes", {}).get("ApproximateReceiveCount", "1")),
+            )
+            for m in resp.get("Messages", [])
+        ]
+
+    def delete(self, message: QueueMessage) -> None:
+        self._client.delete_message(QueueUrl=self._url, ReceiptHandle=message.receipt)
+
+    def extend_visibility(self, message: QueueMessage, seconds: int) -> None:
+        self._client.change_message_visibility(
+            QueueUrl=self._url, ReceiptHandle=message.receipt, VisibilityTimeout=seconds
+        )
 
 
 def get_queue(request: Request) -> JobQueue:
