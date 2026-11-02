@@ -86,7 +86,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Deps: C3
 
 ### Checkpoint 1 (gate)
-- [ ] You review and approve `contracts/`. Nothing in Stage 2+ starts before this.
+- [x] You review and approve `contracts/`. Nothing in Stage 2+ starts before this.
 
 ---
 ## Stage 2: Pipeline (agent `pipeline`)
