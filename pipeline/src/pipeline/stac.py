@@ -46,6 +46,7 @@ class SceneRecord(BaseModel):
     datetime: datetime
     cloud_cover: float
     tile: str  # MGRS tile, e.g. "30UUG"
+    boa_offset_applied: bool  # earthsearch:boa_offset_applied; missing counts as False
     assets: dict[str, str]  # band name (B01..B12, "SCL") -> href
 
 
@@ -117,6 +118,7 @@ def _record(item: Any) -> SceneRecord | None:
         datetime=item.datetime.astimezone(UTC),
         cloud_cover=float(cloud),
         tile=_tile(props),
+        boa_offset_applied=props.get("earthsearch:boa_offset_applied") is True,
         assets=assets,
     )
 

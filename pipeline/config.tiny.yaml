@@ -1,0 +1,6 @@
+# Tiny fixture site (about 320 m x 560 m) for the end-to-end test and quick local runs.
+site: tiny-fixture
+boundary_path: sites/tiny-fixture.geojson
+window: {start: 2025-04-08, end: 2025-04-08}
+cloud_threshold: 40
+output_dir: out

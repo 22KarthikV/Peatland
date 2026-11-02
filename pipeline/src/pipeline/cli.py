@@ -12,6 +12,9 @@ import typer
 
 from pipeline.config import RunConfig, load_config
 from pipeline.log import RunLogger
+from pipeline.output import SceneNotBoaCorrectedError
+from pipeline.runner import run_pipeline
+from pipeline.stac import NoUsableScenesError
 
 app = typer.Typer(help="PeatWatch Sentinel-2 pipeline.", no_args_is_help=True)
 
@@ -63,3 +66,14 @@ def run(
         raise typer.Exit(code=2) from exc
     logger = start_run(cfg, run_id)
     typer.echo(f"run {logger.run_id} started; log at {logger.path}")
+    try:
+        result = run_pipeline(cfg, logger, package=f"pipeline {_package_version()}")
+    except (NoUsableScenesError, SceneNotBoaCorrectedError) as exc:
+        logger.event("failed", error=str(exc))
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=3) from exc
+    except Exception as exc:
+        logger.event("failed", error=f"{type(exc).__name__}: {exc}")
+        typer.echo(f"error: {type(exc).__name__}: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"{result.outcome}: s3://{cfg.buckets.data}/{result.key}")
