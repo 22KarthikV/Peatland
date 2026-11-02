@@ -106,7 +106,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline/tests/test_mask.py`
   - Files: `pipeline/src/pipeline/mask.py`, test
   - Deps: P1
-- [ ] **P4 STAC query and scene filter** | S | B | M
+- [x] **P4 STAC query and scene filter** | S | B | M
   - Accept: Earth Search query by boundary and window; cloud-cover filter; clear error when zero usable scenes; recorded-response test, no network in tests.
   - Verify: `uv run pytest pipeline/tests/test_stac.py`
   - Files: `pipeline/src/pipeline/stac.py`, test, recorded fixture
