@@ -4,7 +4,7 @@ import datetime as dt
 import uuid
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class SiteCreate(BaseModel):
@@ -53,3 +53,45 @@ class SitePage(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class DateRange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    start: dt.date
+    end: dt.date
+
+
+class RunCreate(BaseModel):
+    """Request body of POST /sites/{id}/runs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    windows: list[DateRange] = Field(min_length=1, max_length=8)
+    model: str | None = Field(
+        default=None, pattern=r"^[a-z0-9][a-z0-9_-]{0,31}-[0-9A-Za-z._-]{1,32}$"
+    )
+    max_cloud_cover_pct: float = Field(default=60, ge=0, le=100)
+
+    @model_validator(mode="after")
+    def _ranges_ordered(self) -> "RunCreate":
+        for w in self.windows:
+            if w.end < w.start:
+                raise ValueError("window end must not be before start")
+        return self
+
+
+class ModelRef(BaseModel):
+    id: uuid.UUID
+    name: str
+    version: str
+
+
+class Run(RunSummary):
+    site_id: uuid.UUID
+    model: ModelRef
+    params: dict[str, Any]
+    progress: dict[str, Any]
+    outputs: dict[str, Any]
+    error: dict[str, Any] | None
+    started_at: dt.datetime | None
