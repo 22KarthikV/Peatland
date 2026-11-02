@@ -17,6 +17,10 @@ class ObjectStore(Protocol):
         """Write one object; raise on failure."""
         ...
 
+    def presign_get(self, bucket: str, key: str, expires_seconds: int = 900) -> str:
+        """Short-lived GET URL for one object; raise on failure."""
+        ...
+
 
 class InMemoryObjectStore:
     """Test double: keeps objects by (bucket, key); set `fail` to simulate an upload error."""
@@ -29,6 +33,14 @@ class InMemoryObjectStore:
         if self.fail:
             raise RuntimeError("simulated S3 failure")
         self.objects[(bucket, key)] = data
+
+    def presign_get(self, bucket: str, key: str, expires_seconds: int = 900) -> str:
+        if self.fail:
+            raise RuntimeError("simulated S3 failure")
+        return (
+            f"http://localhost:4566/{bucket}/{key}?X-Amz-Algorithm=AWS4-HMAC-SHA256"
+            f"&X-Amz-Expires={expires_seconds}&X-Amz-Signature={'0' * 64}"
+        )
 
 
 class S3ObjectStore:
@@ -47,6 +59,15 @@ class S3ObjectStore:
 
     def put(self, bucket: str, key: str, data: bytes, content_type: str) -> None:
         self._client.put_object(Bucket=bucket, Key=key, Body=data, ContentType=content_type)
+
+    def presign_get(self, bucket: str, key: str, expires_seconds: int = 900) -> str:
+        return str(
+            self._client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": bucket, "Key": key},
+                ExpiresIn=expires_seconds,
+            )
+        )
 
 
 def get_storage(request: Request) -> ObjectStore:

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from api.auth import load_key_hashes
 from api.errors import register_error_handlers
 from api.ratelimit import RateLimiter
-from api.routes import runs, sites
+from api.routes import changes, classifications, runs, sites
 from api.settings import Settings, get_settings
 
 VERSION = "0.1.0"
@@ -33,6 +33,8 @@ def create_app(settings: Settings | None = None, limiter: RateLimiter | None = N
 
     app.include_router(sites.router)
     app.include_router(runs.router)
+    app.include_router(classifications.router)
+    app.include_router(changes.router)
 
     return app
 
