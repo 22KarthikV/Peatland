@@ -112,7 +112,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Files: `pipeline/src/pipeline/stac.py`, test, recorded fixture
   - Deps: P1
 - [ ] **P5 Compositing and grid** | S | C | M
-  - Accept: per-pixel median composite; coverage band (count of valid obs); reproject to EPSG:27700 10 m and clip to site buffer; fixture-raster tests for CRS, resolution, no unexpected nodata.
+  - Accept: per-pixel median composite; coverage band (count of valid obs); reproject to EPSG:32630 10 m (contract C2) and clip to site buffer; fixture-raster tests for CRS, resolution, no unexpected nodata.
   - Verify: `uv run pytest pipeline/tests/test_composite.py`
   - Files: `pipeline/src/pipeline/composite.py`, `grid.py`, test
   - Deps: P3
