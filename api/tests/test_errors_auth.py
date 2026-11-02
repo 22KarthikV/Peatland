@@ -24,6 +24,8 @@ def _app(job_limit: int = 10, clock: list[float] | None = None) -> FastAPI:
         rate_limit_default_per_minute=3,
     )
     app = create_app(settings, RateLimiter(clock=lambda: ticks[0]))
+    # Drop the included routers (real /sites): this test uses POST /sites as a stand-in job route.
+    app.router.routes = [r for r in app.router.routes if "Included" not in type(r).__name__]
 
     @app.get("/protected", dependencies=[Depends(enforce_rate_limit)])
     async def protected() -> dict[str, bool]:
