@@ -95,3 +95,96 @@ class Run(RunSummary):
     outputs: dict[str, Any]
     error: dict[str, Any] | None
     started_at: dt.datetime | None
+
+
+class ClassRef(BaseModel):
+    id: int
+    name: str
+    label: str
+    hex: str
+
+
+class ClassArea(BaseModel):
+    # `class` is a keyword, so the field is aliased; responses are dumped by alias.
+    model_config = ConfigDict(populate_by_name=True)
+
+    class_: ClassRef = Field(alias="class")
+    area_ha: float
+    percent: float
+
+
+class Window(BaseModel):
+    year: int
+    season: str
+    start: dt.date
+    end: dt.date
+
+
+class Product(BaseModel):
+    id: uuid.UUID
+    cog_uri: str
+    tile_url: str
+    download_url: str
+    model: ModelRef
+    created_at: dt.datetime
+
+
+class Classification(Product):
+    composite_id: uuid.UUID
+    window: Window
+    class_areas: list[ClassArea]
+
+
+class ClassificationPage(BaseModel):
+    items: list[Classification]
+    total: int
+    limit: int
+    offset: int
+
+
+class WindowRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    year: int = Field(ge=2015, le=2100)
+    season: str = Field(pattern=r"^(spring|summer|autumn|winter|annual|w[0-9]{8}-[0-9]{8})$")
+
+
+class ChangeCreate(BaseModel):
+    """Request body of POST /sites/{id}/changes."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    from_: WindowRef = Field(alias="from")
+    to: WindowRef
+    model: str | None = Field(
+        default=None, pattern=r"^[a-z0-9][a-z0-9_-]{0,31}-[0-9A-Za-z._-]{1,32}$"
+    )
+
+
+class Change(Product):
+    model_config = ConfigDict(populate_by_name=True)
+
+    site_id: uuid.UUID
+    from_: Window = Field(alias="from")
+    to: Window
+    from_classification_id: uuid.UUID
+    to_classification_id: uuid.UUID
+
+
+class Transition(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    from_class: ClassRef
+    to_class: ClassRef
+    area_ha: float
+    percent: float
+
+
+class ChangeStats(BaseModel):
+    change: Change
+    units: Literal["hectares"] = "hectares"
+    pixel_area_ha: float
+    total_ha: float
+    transitions: list[Transition]
+    from_class_areas: list[ClassArea]
+    to_class_areas: list[ClassArea]
