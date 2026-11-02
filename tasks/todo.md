@@ -159,7 +159,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_baseline_ndvi.py`
   - Files: `ml/src/ml/baseline_ndvi.py`, `evaluate.py`, test
   - Deps: M2, M3
-- [ ] **M5 Random-forest baseline** | S | B (with M6) | S
+- [x] **M5 Random-forest baseline** | S | B (with M6) | S
   - Accept: per-pixel RF on same features, saved model, metrics on test blocks.
   - Verify: `uv run pytest ml/tests/test_baseline_rf.py`
   - Files: `ml/src/ml/baseline_rf.py`, test
