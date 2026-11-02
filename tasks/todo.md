@@ -51,7 +51,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: you approve in chat.
   - Files: ADR
   - Deps: L1
-- [ ] **L3 Hand-labelling protocol and validation set** | S | - | S
+- [x] **L3 Hand-labelling protocol and validation set** | S | - | S
   - Do: protocol and a small QGIS/GeoJSON workflow for ~100 polygons across classes inside the test blocks; empty template file. (h) you label (or part).
   - Accept: `docs/labels/protocol.md`, `data/labels/handlabel.geojson` template with schema.
   - Verify: file loads in `geopandas`; schema test passes.
