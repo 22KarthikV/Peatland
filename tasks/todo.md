@@ -149,7 +149,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_split.py`
   - Files: `ml/src/ml/split.py`, test
   - Deps: M1
-- [ ] **M3 Metrics** | H | A with M2 | S
+- [x] **M3 Metrics** | H | A with M2 | S
   - Accept: per-class IoU, F1, mean IoU, confusion matrix; known-input tests.
   - Verify: `uv run pytest ml/tests/test_metrics.py`
   - Files: `ml/src/ml/metrics.py`, test
