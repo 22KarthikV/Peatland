@@ -1,0 +1,40 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: peatwatch
+      POSTGRES_PASSWORD: peatwatch
+      POSTGRES_DB: peatwatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peatwatch -d peatwatch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  localstack:
+    image: localstack/localstack:2026.10.4
+    environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:?set LOCALSTACK_AUTH_TOKEN in .env}
+      SERVICES: s3,sqs,secretsmanager
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - ./infra/localstack/init.sh:/etc/localstack/init/ready.d/init.sh:ro
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if b'\"completed\": true' in urllib.request.urlopen('http://localhost:4566/_localstack/init/ready').read() else 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgis-data:
+  localstack-data:

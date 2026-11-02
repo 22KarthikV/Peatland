@@ -32,3 +32,4 @@ mlruns/
 Thumbs.db
 .idea/
 .vscode/
+!.env.example

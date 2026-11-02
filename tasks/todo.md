@@ -13,7 +13,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run python --version` prints 3.13.x; `git log --oneline` shows one commit.
   - Files: `.gitignore`, `.python-version`, `pyproject.toml`, `README.md`, 3 package `pyproject.toml`s (setup counts as one)
   - Deps: none
-- [ ] **F2 Docker Compose: PostGIS + LocalStack** | S | - | M
+- [x] **F2 Docker Compose: PostGIS + LocalStack** | S | - | M
   - Do: compose with PostGIS and LocalStack (S3, SQS, Secrets Manager), healthchecks, init script creating buckets and queue. Document which LocalStack services work on the current free terms.
   - Accept: `docker compose up -d` healthy; bucket and queue exist; PostGIS answers `SELECT postgis_version()`; findings written to `docs/decisions/0001-localstack-scope.md`.
   - Verify: `docker compose up -d` then `docker compose ps` all healthy; script `scripts/smoke_stack.sh` passes.
