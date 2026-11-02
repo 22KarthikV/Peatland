@@ -1,0 +1,8 @@
+[project]
+name = "peatwatch"
+version = "0.0.0"
+description = "Peatland condition monitoring platform (workspace root)"
+requires-python = ">=3.13,<3.14"
+
+[tool.uv.workspace]
+members = ["pipeline", "ml", "api"]

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+# Node
+node_modules/
+web/dist/
+# Secrets and local config
+.env
+.env.*
+!.env.example
+# Data and artifacts (never commit imagery or models)
+data/
+artifacts/
+mlruns/
+*.tif
+*.tiff
+!**/fixtures/**/*.tif
+# Tooling
+.claude/worktrees/
+.claude/settings.local.json
+.terraform/
+*.tfstate
+*.tfstate.*
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
