@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peatwatch.local/contracts/queue.schema.json",
+  "title": "PeatWatch SQS job message",
+  "description": "Body of every message on the peatwatch-jobs queue (contracts/queue.md). One message per runs row; produced by the API, consumed by the worker.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "kind",
+    "run_id",
+    "site",
+    "windows",
+    "model",
+    "params",
+    "idempotency_key"
+  ],
+  "properties": {
+    "contract_version": {
+      "description": "Version of this message contract. Bumped on any breaking change.",
+      "const": 1
+    },
+    "kind": {
+      "description": "Same values as the run_kind enum in db-schema.md.",
+      "enum": ["pipeline", "change"]
+    },
+    "run_id": {
+      "description": "runs.id; the worker updates this row and writes runs/<run_id>/log.jsonl.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "slug"],
+      "properties": {
+        "id": {"type": "string", "format": "uuid"},
+        "slug": {"$ref": "#/$defs/slug"}
+      }
+    },
+    "windows": {
+      "description": "Resolved date windows, same shape as the API Window schema. pipeline: one to eight windows to composite and classify. change: exactly two, the earlier ('from') first.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/window"}
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,31}$"},
+        "version": {"type": "string", "pattern": "^[0-9A-Za-z._-]{1,32}$"}
+      }
+    },
+    "params": {
+      "description": "runs.params: the resolved request body (pipeline: windows, model, max_cloud_cover_pct; change: from, to, model).",
+      "type": "object"
+    },
+    "idempotency_key": {
+      "description": "runs.idempotency_key: SHA-256 of canonical JSON {kind, site, boundary_sha256, params, model} (db-schema.md, runs). Consumers use it to detect redelivery; the claim is the compare-and-set on runs.status.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "enqueued_at": {
+      "description": "UTC time the API sent the message (informational).",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"kind": {"const": "change"}}, "required": ["kind"]},
+      "then": {"properties": {"windows": {"minItems": 2, "maxItems": 2}}}
+    }
+  ],
+  "$defs": {
+    "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"},
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["year", "season", "start", "end"],
+      "properties": {
+        "year": {"type": "integer", "minimum": 2015, "maximum": 2100},
+        "season": {
+          "description": "C2 season token.",
+          "type": "string",
+          "pattern": "^(spring|summer|autumn|winter|annual|w[0-9]{8}-[0-9]{8})$"
+        },
+        "start": {"type": "string", "format": "date"},
+        "end": {"type": "string", "format": "date"}
+      }
+    }
+  }
+}

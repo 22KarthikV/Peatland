@@ -1,0 +1,49 @@
+{
+  "id": "18ecdafe-920b-467f-ad18-73ef5e608190",
+  "kind": "pipeline",
+  "status": "failed",
+  "created_at": "2026-11-02T10:02:00Z",
+  "finished_at": "2026-11-02T10:03:40Z",
+  "site_id": "3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12",
+  "model": {
+    "id": "7b2e9d34-5c18-4a6f-8e03-91d4f6a2c5b8",
+    "name": "unet",
+    "version": "1.0.0"
+  },
+  "params": {
+    "windows": [
+      {
+        "start": "2025-03-19",
+        "end": "2025-03-19"
+      },
+      {
+        "start": "2025-04-08",
+        "end": "2025-04-08"
+      }
+    ],
+    "model": "unet-1.0.0",
+    "max_cloud_cover_pct": 5
+  },
+  "progress": {
+    "step": "composite",
+    "done": 0,
+    "total": 2
+  },
+  "outputs": {
+    "composite_ids": [],
+    "classification_ids": [],
+    "change_id": null
+  },
+  "error": {
+    "code": "no_usable_scenes",
+    "message": "No scenes under 5% cloud cover were found for 2025-03-19. Raise max_cloud_cover_pct or choose another date.",
+    "detail": {
+      "window": {
+        "start": "2025-03-19",
+        "end": "2025-03-19"
+      },
+      "max_cloud_cover_pct": 5
+    }
+  },
+  "started_at": "2026-11-02T10:02:06Z"
+}
