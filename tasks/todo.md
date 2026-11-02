@@ -206,7 +206,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_worker.py`
   - Files: `api/src/api/worker.py`, `api/Dockerfile.worker`, test
   - Deps: A5, P8 (real call wired after CP2; mock until then)
-- [ ] **A7 Classifications, changes, stats and downloads** | S | - | M
+- [x] **A7 Classifications, changes, stats and downloads** | S | - | M
   - Accept: list classifications by date; `POST /sites/{id}/changes`; `GET /changes/{id}/stats` JSON and CSV; change GeoTIFF download link.
   - Verify: `uv run pytest api/tests/test_changes.py`
   - Files: `api/src/api/routes/{classifications,changes}.py`, test
