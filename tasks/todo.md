@@ -201,7 +201,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_runs.py`
   - Files: `api/src/api/routes/runs.py`, `queue.py`, test
   - Deps: A4
-- [ ] **A6 Worker container** | S | - | M
+- [x] **A6 Worker container** | S | - | M
   - Accept: worker consumes queue, updates run status, calls pipeline then inference (pluggable, mock in tests); failure writes error and status.
   - Verify: `uv run pytest api/tests/test_worker.py`
   - Files: `api/src/api/worker.py`, `api/Dockerfile.worker`, test
