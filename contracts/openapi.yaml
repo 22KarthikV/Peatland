@@ -1,0 +1,786 @@
+openapi: 3.1.0
+info:
+  title: PeatWatch API
+  version: 0.1.0
+  summary: Sites, processing runs, land condition maps and change statistics.
+  description: |
+    Contract C3. Tables behind these resources are in `contracts/db-schema.md`; S3 keys and raster
+    formats in `contracts/cog-layout.md`; class ids and colours in `contracts/classes.yaml`.
+
+    - **Auth (SPEC D7):** every endpoint except `GET /health` needs an `X-API-Key` header. A missing
+      or unknown key returns `401`.
+    - **Rate limit (SPEC D7):** per API key. Job-starting endpoints (`POST /sites`,
+      `POST /sites/{site_id}/runs`, `POST /sites/{site_id}/changes`) default to 10 requests per
+      minute, all other endpoints to 120 per minute. Over the limit returns `429` with
+      `Retry-After` in seconds.
+    - **Errors:** every non-2xx response body is `Error` (`{code, message, detail}`).
+    - **Areas** are hectares (`*_ha`), computed in EPSG:32630 where one 10 m pixel is 0.01 ha.
+    - **Pagination:** list endpoints take `limit` (1-200, default 50) and `offset` (default 0) and
+      return `{items, total, limit, offset}`.
+    - **Async jobs:** runs and change requests return `202` with a `Run`; poll `GET /runs/{run_id}`.
+    - **Map tiles** are served by TiTiler, not by this API (see the `tiles` tag). Product
+      responses carry a ready `tile_url` template.
+servers:
+  - url: http://localhost:8000
+    description: Local API (docker compose)
+tags:
+  - name: health
+  - name: sites
+  - name: runs
+  - name: classifications
+  - name: changes
+  - name: tiles
+    description: |
+      External endpoint served by TiTiler (`titiler` container, port 8001), documented here so
+      clients know the URL shape. The PRD shorthand `/tiles/{cog}/{z}/{x}/{y}` maps to TiTiler's
+      `/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=<cog_uri>`. TiTiler reads `s3://` URIs
+      through the configured S3 endpoint (LocalStack locally). No API key.
+security:
+  - ApiKeyAuth: []
+paths:
+  /health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Liveness check for the load balancer
+      security: []
+      responses:
+        "200":
+          description: The API process is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example: {status: ok, version: 0.1.0}
+  /sites:
+    post:
+      tags: [sites]
+      operationId: createSite
+      summary: Create a site from a GeoJSON boundary
+      description: |
+        The boundary must be a valid Polygon or MultiPolygon (or a Feature holding one) in WGS 84,
+        inside the supported region and not larger than the configured maximum area. Error codes:
+        `boundary_invalid`, `boundary_outside_region`, `boundary_too_large`, `validation_error`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteCreate"
+      responses:
+        "201":
+          description: Site created.
+          headers:
+            Location:
+              description: URL of the new site.
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteDetail"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "409": {$ref: "#/components/responses/Conflict"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+    get:
+      tags: [sites]
+      operationId: listSites
+      summary: List sites
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: q
+          in: query
+          description: Case-insensitive substring match on name or slug.
+          schema: {type: string, maxLength: 200}
+      responses:
+        "200":
+          description: A page of sites, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SitePage"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /sites/{site_id}:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      tags: [sites]
+      operationId: getSite
+      summary: Show one site with its available dates
+      responses:
+        "200":
+          description: The site, its boundary and the windows that have a composite.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteDetail"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /sites/{site_id}/runs:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    post:
+      tags: [runs]
+      operationId: createRun
+      summary: Start a pipeline and inference run for a date range
+      description: |
+        Builds a composite for each window and classifies it with the chosen model. Returns at once;
+        the job runs on the worker. If an identical run (same run idempotency key, see
+        db-schema.md) is still queued or running, that run is returned with `200` and nothing new
+        is enqueued. Resubmitting after a failure starts a new run that skips finished steps.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunCreate"
+      responses:
+        "200":
+          description: An identical run is already active; it is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "202":
+          description: Run queued.
+          headers:
+            Location:
+              description: URL to poll, `/runs/{run_id}`.
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /runs/{run_id}:
+    parameters:
+      - name: run_id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+    get:
+      tags: [runs]
+      operationId: getRun
+      summary: Poll run status and errors
+      responses:
+        "200":
+          description: The run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /sites/{site_id}/classifications:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    get:
+      tags: [classifications]
+      operationId: listClassifications
+      summary: List classification maps by date
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: model
+          in: query
+          description: Filter by model, `<name>` or `<name>-<version>`.
+          schema: {type: string, pattern: "^[a-z0-9][a-z0-9_-]{0,31}(-[0-9A-Za-z._-]{1,32})?$"}
+        - name: year
+          in: query
+          schema: {type: integer, minimum: 2015, maximum: 2100}
+      responses:
+        "200":
+          description: A page of classifications ordered by window start, oldest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassificationPage"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /sites/{site_id}/changes:
+    parameters:
+      - $ref: "#/components/parameters/SiteId"
+    post:
+      tags: [changes]
+      operationId: createChange
+      summary: Compute change between two dates
+      description: |
+        Both windows must already have a classification by the same model
+        (error `classification_missing` otherwise). `from` must start before `to`. If the change
+        exists and is current, it is returned with `200`. Otherwise a `change` run is queued and
+        returned with `202`; when it succeeds, `Run.outputs.change_id` is set.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeCreate"
+      responses:
+        "200":
+          description: The change already exists for these windows and model.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Change"
+        "202":
+          description: Change run queued (or an identical active run returned).
+          headers:
+            Location:
+              description: URL to poll, `/runs/{run_id}`.
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /changes/{change_id}/stats:
+    parameters:
+      - name: change_id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+    get:
+      tags: [changes]
+      operationId: getChangeStats
+      summary: Area per transition in hectares (JSON or CSV)
+      description: |
+        Content negotiation by `Accept`: `application/json` (default, also for `*/*` or no header)
+        or `text/csv`. Any other type returns `406`. The CSV has a header row and one row per
+        transition, columns `from_class_id,from_class,to_class_id,to_class,area_ha,percent`,
+        followed by nothing else; it is served with
+        `Content-Disposition: attachment; filename="<site>-<from>__<to>-<model>.csv"`.
+        (OpenAPI ignores an `Accept` header parameter, so negotiation is expressed by the two
+        media types under `200`.)
+      responses:
+        "200":
+          description: Statistics for the change.
+          headers:
+            Content-Disposition:
+              description: Set for `text/csv` only.
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeStats"
+            text/csv:
+              schema:
+                type: string
+              example: |
+                from_class_id,from_class,to_class_id,to_class,area_ha,percent
+                1,bog,1,bog,812.40,65.80
+                1,bog,3,felled_or_burnt_bare,24.13,1.95
+        "401": {$ref: "#/components/responses/Unauthorized"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "406": {$ref: "#/components/responses/NotAcceptable"}
+        "422": {$ref: "#/components/responses/ValidationError"}
+        "429": {$ref: "#/components/responses/RateLimited"}
+  /cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png:
+    servers:
+      - url: http://localhost:8001
+        description: TiTiler (external to the API code)
+    get:
+      tags: [tiles]
+      operationId: getTile
+      summary: Map tile from a COG (TiTiler, external)
+      description: |
+        Served by TiTiler, not the API. Classification and change COGs carry an embedded
+        colormap, so no extra parameters are needed. Composites need `bidx` and `rescale`
+        (e.g. `bidx=4&bidx=3&bidx=2&rescale=0,0.3` for true colour).
+      x-external: true
+      security: []
+      parameters:
+        - name: z
+          in: path
+          required: true
+          schema: {type: integer, minimum: 0, maximum: 22}
+        - name: x
+          in: path
+          required: true
+          schema: {type: integer, minimum: 0}
+        - name: y
+          in: path
+          required: true
+          schema: {type: integer, minimum: 0}
+        - name: url
+          in: query
+          required: true
+          description: The product `cog_uri`, URL-encoded (e.g. `s3://peatwatch-data/...tif`).
+          schema: {type: string}
+        - name: bidx
+          in: query
+          required: false
+          schema:
+            type: array
+            items: {type: integer, minimum: 1}
+          style: form
+          explode: true
+        - name: rescale
+          in: query
+          required: false
+          schema: {type: string}
+      responses:
+        "200":
+          description: PNG tile.
+          content:
+            image/png:
+              schema: {type: string, contentMediaType: image/png}
+        "404":
+          description: Tile outside the COG bounds (TiTiler error body, not `Error`).
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Keys are configured through the environment (`API_KEYS`, stored as SHA-256 hashes) or
+        AWS Secrets Manager; never in the repo.
+  parameters:
+    SiteId:
+      name: site_id
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: {type: integer, minimum: 1, maximum: 200, default: 50}
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema: {type: integer, minimum: 0, default: 0}
+  headers:
+    RetryAfter:
+      description: Seconds to wait before retrying.
+      required: true
+      schema: {type: integer, minimum: 1}
+    RateLimitLimit:
+      description: Requests allowed per window for this key and endpoint group.
+      schema: {type: integer}
+    RateLimitRemaining:
+      description: Requests left in the current window.
+      schema: {type: integer}
+  responses:
+    Unauthorized:
+      description: Missing or unknown `X-API-Key` (code `unauthorized`).
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+          example: {code: unauthorized, message: A valid X-API-Key header is required., detail: null}
+    NotFound:
+      description: Resource does not exist (code `not_found`).
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+          example: {code: not_found, message: Site not found., detail: {site_id: 3f1c2a8e-0d4b-4e5f-9a61-2b7c8d9e0f12}}
+    Conflict:
+      description: Unique value already used, e.g. site slug (code `conflict`).
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    NotAcceptable:
+      description: The `Accept` type is not offered (code `not_acceptable`).
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    ValidationError:
+      description: |
+        The request is well-formed but invalid. `detail` lists field errors for
+        `validation_error`, or explains the business rule for the other codes.
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+          examples:
+            boundary_too_large:
+              value:
+                code: boundary_too_large
+                message: The boundary is 82 140 ha; the maximum is 50 000 ha.
+                detail: {area_ha: 82140.0, max_area_ha: 50000.0}
+            validation_error:
+              value:
+                code: validation_error
+                message: Request body is invalid.
+                detail:
+                  - {loc: [body, windows, 0, end], msg: end must not be before start, type: value_error}
+    RateLimited:
+      description: Too many requests for this API key (code `rate_limited`).
+      headers:
+        Retry-After: {$ref: "#/components/headers/RetryAfter"}
+        RateLimit-Limit: {$ref: "#/components/headers/RateLimitLimit"}
+        RateLimit-Remaining: {$ref: "#/components/headers/RateLimitRemaining"}
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+          example: {code: rate_limited, message: Too many requests; retry after 12 seconds., detail: {retry_after: 12}}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, detail]
+      properties:
+        code:
+          description: Stable machine-readable code.
+          type: string
+          enum:
+            - validation_error
+            - boundary_invalid
+            - boundary_outside_region
+            - boundary_too_large
+            - classification_missing
+            - unauthorized
+            - not_found
+            - conflict
+            - not_acceptable
+            - rate_limited
+            - internal_error
+            # Run errors (Run.error), set by the worker:
+            - no_usable_scenes
+            - enqueue_failed
+            - worker_lost
+            - step_failed
+        message:
+          description: Plain-language message, safe to show to the user, with a next step where possible.
+          type: string
+        detail:
+          description: Extra structured context (field errors, limits, ids) or null.
+          type: [object, array, string, "null"]
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status: {const: ok}
+        version: {type: string}
+    Page:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items: {type: array}
+        total: {type: integer, minimum: 0}
+        limit: {type: integer, minimum: 1, maximum: 200}
+        offset: {type: integer, minimum: 0}
+    Slug:
+      type: string
+      pattern: "^[a-z0-9][a-z0-9-]{1,62}$"
+    Season:
+      description: C2 season token, e.g. `summer` or a custom window `w20250319-20250319`.
+      type: string
+      pattern: "^(spring|summer|autumn|winter|annual|w[0-9]{8}-[0-9]{8})$"
+    Position:
+      type: array
+      minItems: 2
+      maxItems: 3
+      items: {type: number}
+    LinearRing:
+      type: array
+      minItems: 4
+      items: {$ref: "#/components/schemas/Position"}
+    Polygon:
+      type: object
+      required: [type, coordinates]
+      properties:
+        type: {const: Polygon}
+        coordinates:
+          type: array
+          minItems: 1
+          items: {$ref: "#/components/schemas/LinearRing"}
+    MultiPolygon:
+      type: object
+      required: [type, coordinates]
+      properties:
+        type: {const: MultiPolygon}
+        coordinates:
+          type: array
+          minItems: 1
+          items:
+            type: array
+            minItems: 1
+            items: {$ref: "#/components/schemas/LinearRing"}
+    BoundaryGeometry:
+      description: GeoJSON geometry in WGS 84 (EPSG:4326, lon/lat).
+      oneOf:
+        - $ref: "#/components/schemas/Polygon"
+        - $ref: "#/components/schemas/MultiPolygon"
+    BoundaryFeature:
+      type: object
+      required: [type, geometry]
+      properties:
+        type: {const: Feature}
+        geometry: {$ref: "#/components/schemas/BoundaryGeometry"}
+        properties: {type: [object, "null"]}
+    SiteCreate:
+      type: object
+      additionalProperties: false
+      required: [name, boundary]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 200}
+        slug:
+          description: Optional; derived from `name` when omitted. Used in S3 keys.
+          $ref: "#/components/schemas/Slug"
+        boundary:
+          oneOf:
+            - $ref: "#/components/schemas/BoundaryGeometry"
+            - $ref: "#/components/schemas/BoundaryFeature"
+    SiteSummary:
+      type: object
+      required: [id, slug, name, area_ha, created_at, latest_run]
+      properties:
+        id: {type: string, format: uuid}
+        slug: {$ref: "#/components/schemas/Slug"}
+        name: {type: string}
+        area_ha: {type: number, minimum: 0, description: Boundary area in hectares.}
+        created_at: {type: string, format: date-time}
+        latest_run:
+          description: Most recent run for the sites list, or null.
+          oneOf:
+            - $ref: "#/components/schemas/RunSummary"
+            - type: "null"
+    Window:
+      description: A composite window. `year` and `season` are the C2 path tokens for it.
+      type: object
+      required: [year, season, start, end]
+      properties:
+        year: {type: integer, minimum: 2015, maximum: 2100}
+        season: {$ref: "#/components/schemas/Season"}
+        start: {type: string, format: date}
+        end: {type: string, format: date}
+    AvailableWindow:
+      allOf:
+        - $ref: "#/components/schemas/Window"
+        - type: object
+          required: [composite_id, models]
+          properties:
+            composite_id: {type: string, format: uuid}
+            models:
+              description: Models (`<name>-<version>`) with a classification for this window.
+              type: array
+              items: {type: string}
+    SiteDetail:
+      allOf:
+        - $ref: "#/components/schemas/SiteSummary"
+        - type: object
+          required: [boundary, available_windows]
+          properties:
+            boundary: {$ref: "#/components/schemas/MultiPolygon"}
+            available_windows:
+              description: Windows with a composite, oldest first.
+              type: array
+              items: {$ref: "#/components/schemas/AvailableWindow"}
+    SitePage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: {$ref: "#/components/schemas/SiteSummary"}
+    DateRange:
+      type: object
+      additionalProperties: false
+      required: [start, end]
+      properties:
+        start: {type: string, format: date}
+        end: {type: string, format: date, description: Inclusive; must not be before start.}
+    ModelRef:
+      type: object
+      required: [id, name, version]
+      properties:
+        id: {type: string, format: uuid}
+        name: {type: string}
+        version: {type: string}
+    RunCreate:
+      type: object
+      additionalProperties: false
+      required: [windows]
+      properties:
+        windows:
+          description: |
+            Date ranges to composite and classify. A range equal to a meteorological season
+            maps to that season token; any other range maps to `w<YYYYMMDD>-<YYYYMMDD>`.
+          type: array
+          minItems: 1
+          maxItems: 8
+          items: {$ref: "#/components/schemas/DateRange"}
+        model:
+          description: Model as `<name>-<version>`; the default model when omitted.
+          type: string
+          pattern: "^[a-z0-9][a-z0-9_-]{0,31}-[0-9A-Za-z._-]{1,32}$"
+        max_cloud_cover_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 60
+    RunStatus:
+      type: string
+      enum: [queued, running, succeeded, failed, cancelled]
+    RunSummary:
+      type: object
+      required: [id, kind, status, created_at, finished_at]
+      properties:
+        id: {type: string, format: uuid}
+        kind: {type: string, enum: [pipeline, change]}
+        status: {$ref: "#/components/schemas/RunStatus"}
+        created_at: {type: string, format: date-time}
+        finished_at: {type: [string, "null"], format: date-time}
+    Run:
+      allOf:
+        - $ref: "#/components/schemas/RunSummary"
+        - type: object
+          required: [site_id, model, params, progress, outputs, error, started_at]
+          properties:
+            site_id: {type: string, format: uuid}
+            model: {$ref: "#/components/schemas/ModelRef"}
+            params: {type: object, description: The resolved request parameters.}
+            progress:
+              type: object
+              properties:
+                step: {type: string, examples: [composite, classify, change]}
+                done: {type: integer, minimum: 0}
+                total: {type: integer, minimum: 0}
+            outputs:
+              type: object
+              properties:
+                composite_ids:
+                  type: array
+                  items: {type: string, format: uuid}
+                classification_ids:
+                  type: array
+                  items: {type: string, format: uuid}
+                change_id: {type: [string, "null"], format: uuid}
+            error:
+              description: Set only when `status` is `failed`.
+              oneOf:
+                - $ref: "#/components/schemas/Error"
+                - type: "null"
+            started_at: {type: [string, "null"], format: date-time}
+    Product:
+      type: object
+      required: [id, cog_uri, tile_url, download_url, model, created_at]
+      properties:
+        id: {type: string, format: uuid}
+        cog_uri:
+          description: "`s3://peatwatch-data/<key>` per cog-layout.md section 3."
+          type: string
+        tile_url:
+          description: TiTiler XYZ template for this COG, `{z}/{x}/{y}` left for the map client.
+          type: string
+          examples:
+            - "http://localhost:8001/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=s3%3A%2F%2Fpeatwatch-data%2Fclassifications%2Fglen-trool%2F2025%2Fw20250408-20250408%2Funet-1.0.0.tif"
+        download_url:
+          description: Short-lived presigned GET URL for the GeoTIFF.
+          type: string
+          format: uri
+        model: {$ref: "#/components/schemas/ModelRef"}
+        created_at: {type: string, format: date-time}
+    Classification:
+      allOf:
+        - $ref: "#/components/schemas/Product"
+        - type: object
+          required: [composite_id, window, class_areas]
+          properties:
+            composite_id: {type: string, format: uuid}
+            window: {$ref: "#/components/schemas/Window"}
+            class_areas:
+              type: array
+              items: {$ref: "#/components/schemas/ClassArea"}
+    ClassificationPage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: {$ref: "#/components/schemas/Classification"}
+    WindowRef:
+      type: object
+      additionalProperties: false
+      required: [year, season]
+      properties:
+        year: {type: integer, minimum: 2015, maximum: 2100}
+        season: {$ref: "#/components/schemas/Season"}
+    ChangeCreate:
+      type: object
+      additionalProperties: false
+      required: [from, to]
+      properties:
+        from: {$ref: "#/components/schemas/WindowRef"}
+        to: {$ref: "#/components/schemas/WindowRef"}
+        model:
+          description: Model as `<name>-<version>`; the default model when omitted.
+          type: string
+          pattern: "^[a-z0-9][a-z0-9_-]{0,31}-[0-9A-Za-z._-]{1,32}$"
+    Change:
+      allOf:
+        - $ref: "#/components/schemas/Product"
+        - type: object
+          required: [site_id, from, to, from_classification_id, to_classification_id]
+          properties:
+            site_id: {type: string, format: uuid}
+            from: {$ref: "#/components/schemas/Window"}
+            to: {$ref: "#/components/schemas/Window"}
+            from_classification_id: {type: string, format: uuid}
+            to_classification_id: {type: string, format: uuid}
+    ClassRef:
+      type: object
+      required: [id, name, label, hex]
+      properties:
+        id: {type: integer, minimum: 0, maximum: 254}
+        name: {type: string, description: "`classes.yaml` name"}
+        label: {type: string}
+        hex: {type: string, pattern: "^#[0-9A-Fa-f]{6}$"}
+    ClassArea:
+      type: object
+      required: [class, area_ha, percent]
+      properties:
+        class: {$ref: "#/components/schemas/ClassRef"}
+        area_ha: {type: number, minimum: 0}
+        percent: {type: number, minimum: 0, maximum: 100}
+    Transition:
+      type: object
+      required: [from_class, to_class, area_ha, percent]
+      properties:
+        from_class: {$ref: "#/components/schemas/ClassRef"}
+        to_class: {$ref: "#/components/schemas/ClassRef"}
+        area_ha: {type: number, minimum: 0}
+        percent:
+          description: Share of `total_ha`.
+          type: number
+          minimum: 0
+          maximum: 100
+    ChangeStats:
+      type: object
+      required: [change, units, pixel_area_ha, total_ha, transitions, from_class_areas, to_class_areas]
+      properties:
+        change: {$ref: "#/components/schemas/Change"}
+        units: {const: hectares}
+        pixel_area_ha: {const: 0.01}
+        total_ha:
+          description: Valid (non-nodata) area inside the boundary.
+          type: number
+          minimum: 0
+        transitions:
+          description: Every non-zero (from, to) pair, including unchanged (from == to).
+          type: array
+          items: {$ref: "#/components/schemas/Transition"}
+        from_class_areas:
+          type: array
+          items: {$ref: "#/components/schemas/ClassArea"}
+        to_class_areas:
+          type: array
+          items: {$ref: "#/components/schemas/ClassArea"}
