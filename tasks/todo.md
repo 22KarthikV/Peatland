@@ -7,7 +7,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
 ## Stage 0: Foundation and Labels (two chains in parallel)
 
 ### Foundation chain (agent `foundation`)
-- [ ] **F1 Git repo and Python workspace** | H | - | S
+- [x] **F1 Git repo and Python workspace** | H | - | S
   - Do: `git init`, `.gitignore` (incl. `.claude/worktrees/`, data, `.env`), `.python-version` 3.13, root `pyproject.toml` uv workspace with empty `pipeline`, `ml`, `api` members, README stub, first commit. (h) approve installing `uv` if missing.
   - Accept: `uv sync --all-packages` succeeds on Python 3.13; first commit exists.
   - Verify: `uv run python --version` prints 3.13.x; `git log --oneline` shows one commit.
