@@ -144,7 +144,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_dataset.py`
   - Files: `ml/pyproject.toml`, `ml/src/ml/{dataset,labels}.py`, test
   - Deps: CP2
-- [ ] **M2 Spatial block split with buffer** | O | A with M3 | S
+- [x] **M2 Spatial block split with buffer** | O | A with M3 | S
   - Accept: 5 km blocks, ~60/20/20, buffer between splits; test proves no patch overlaps across splits; demo site fully held out (D4).
   - Verify: `uv run pytest ml/tests/test_split.py`
   - Files: `ml/src/ml/split.py`, test
