@@ -126,7 +126,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline/tests/test_output.py`; `rio cogeo validate` on output.
   - Files: `pipeline/src/pipeline/output.py`, `store.py`, test
   - Deps: P4, P5, P6
-- [ ] **P8 End-to-end run on tiny site (WALKING SKELETON, part 1)** | S | - | M
+- [x] **P8 End-to-end run on tiny site (WALKING SKELETON, part 1)** | S | - | M
   - Accept: CLI runs STAC (recorded) -> composite COG on a tiny fixture site; integration test with LocalStack; a timed run on the pilot region finishes under 30 minutes (h confirm).
   - Verify: `uv run pytest tests -k pipeline_e2e`; `uv run peatwatch-pipeline run --site <geojson> --config pipeline/config.yaml`
   - Files: `tests/test_pipeline_e2e.py`, `pipeline/config.yaml`, CLI glue
