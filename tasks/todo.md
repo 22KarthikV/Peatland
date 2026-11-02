@@ -74,7 +74,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: JSON Schema validates a sample sidecar; reviewer pass.
   - Files: `contracts/cog-layout.md`, `contracts/sidecar.schema.json`, `contracts/stac-item.example.json`
   - Deps: C1
-- [ ] **C3 DB schema and OpenAPI** | O | - | M
+- [x] **C3 DB schema and OpenAPI** | O | - | M
   - Accept: tables per PRD (sites, composites, models, runs, classifications, changes) with types, FKs, indexes; run states; draft `contracts/openapi.yaml` with all MVP endpoints, error format `{code,message,detail}`, API-key header, rate-limit response.
   - Verify: `openapi-spec-validator contracts/openapi.yaml`
   - Files: `contracts/db-schema.md`, `contracts/openapi.yaml`
