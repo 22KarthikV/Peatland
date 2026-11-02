@@ -1,4 +1,3 @@
-# mypy: disable-error-code=import-untyped
 """Rasterise vector labels onto a composite grid as uint8 class ids.
 
 Class ids and the nodata value come from ``contracts/classes.yaml`` (nodata 255 means

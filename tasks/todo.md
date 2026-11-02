@@ -139,7 +139,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
 ## Stage 3: ML baselines, API and web on mocks
 
 ### ML (agent `ml`)
-- [ ] **M1 Package skeleton, patch dataset, label rasterisation** | S | - | M
+- [x] **M1 Package skeleton, patch dataset, label rasterisation** | S | - | M
   - Accept: 256x256 patches from composites; labels rasterised to class ids per contract; nodata handled.
   - Verify: `uv run pytest ml/tests/test_dataset.py`
   - Files: `ml/pyproject.toml`, `ml/src/ml/{dataset,labels}.py`, test

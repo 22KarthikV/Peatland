@@ -39,5 +39,5 @@ markers = ["localstack: needs the docker-compose stack and RUN_LOCALSTACK=1"]
 addopts = "--cov=pipeline --cov=ml --cov=api --cov-report=term-missing"
 
 [[tool.mypy.overrides]]
-module = ["rasterio", "rasterio.*", "boto3", "boto3.*", "botocore", "botocore.*"]
+module = ["rasterio", "rasterio.*", "boto3", "boto3.*", "botocore", "botocore.*", "geopandas", "geopandas.*", "jsonschema", "jsonschema.*", "shapely", "shapely.*", "sklearn", "sklearn.*", "mlflow", "mlflow.*", "joblib", "geoalchemy2", "geoalchemy2.*", "alembic", "alembic.*"]
 ignore_missing_imports = true
