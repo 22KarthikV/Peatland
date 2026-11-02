@@ -69,7 +69,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest contracts`
   - Files: `contracts/classes.yaml`, `contracts/bands.yaml`, `contracts/tests/test_contracts.py`
   - Deps: L2
-- [ ] **C2 COG, STAC and S3 layout** | O | - | M
+- [x] **C2 COG, STAC and S3 layout** | O | - | M
   - Accept: key layout `composites/<site>/<year>/<season>.tif` plus classification and change paths; float32 composite, uint8 classification with embedded colormap; JSON sidecar schema (bands, scene ids, versions, parameters); STAC item template; idempotency key definition.
   - Verify: JSON Schema validates a sample sidecar; reviewer pass.
   - Files: `contracts/cog-layout.md`, `contracts/sidecar.schema.json`, `contracts/stac-item.example.json`
