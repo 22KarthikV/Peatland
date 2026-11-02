@@ -8,7 +8,13 @@ requires-python = ">=3.13,<3.14"
 members = ["pipeline", "ml", "api"]
 
 [dependency-groups]
-dev = ["ruff>=0.8", "mypy>=1.13", "pytest>=8.3", "pytest-cov>=6.0"]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "openapi-spec-validator>=0.9.0",
+]
 
 [tool.ruff]
 line-length = 100
