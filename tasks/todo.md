@@ -31,7 +31,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: list agents in the app shows all six; `python -m json.tool .claude/settings.json`.
   - Files: `.claude/agents/*.md`, `.claude/settings.json`, `tasks/handoffs/TEMPLATE.md`
   - Deps: F1
-- [ ] **F5 Harness smoke test and usage check** | S | - | S
+- [x] **F5 Harness smoke test and usage check** | S | - | S
   - Do: spawn two trivial Haiku agents in two worktrees at once (each adds a file in its own folder); confirm they run in parallel, how branch names come back, and that merge works. Test whether auto-compact at 25% takes effect (`/context`). Record real Pro usage and which models are available.
   - Accept: findings in `docs/decisions/0002-agent-harness.md`; SPEC `[test]` items updated to confirmed/failed; cap and tiers adjusted if needed.
   - Verify: both worktree branches merged cleanly; ADR written.
