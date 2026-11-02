@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peatwatch.local/contracts/sidecar.schema.json",
+  "title": "PeatWatch raster sidecar",
+  "description": "Provenance record written next to every composite, classification and change COG (contracts/cog-layout.md, section 5).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "key",
+    "site",
+    "date_range",
+    "year",
+    "season",
+    "crs",
+    "resolution_m",
+    "dtype",
+    "nodata",
+    "bands",
+    "scene_ids",
+    "versions",
+    "parameters",
+    "cloud_stats",
+    "inputs",
+    "idempotency_key",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "kind": {"enum": ["composite", "classification", "change"]},
+    "key": {
+      "description": "S3 key of the COG in bucket peatwatch-data.",
+      "type": "string",
+      "pattern": "^(composites|classifications|changes)/[a-z0-9][a-z0-9-]{1,62}/.+\\.tif$"
+    },
+    "site": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"},
+    "run_id": {"type": "string", "minLength": 1},
+    "date_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"type": "string", "format": "date"},
+        "end": {"type": "string", "format": "date"}
+      }
+    },
+    "year": {"type": "integer", "minimum": 2015, "maximum": 2100},
+    "season": {"$ref": "#/$defs/season"},
+    "change_pair": {
+      "description": "Change products only: the two windows compared. year/season above equal the 'to' window.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {"$ref": "#/$defs/window"},
+        "to": {"$ref": "#/$defs/window"}
+      }
+    },
+    "crs": {"const": "EPSG:32630"},
+    "resolution_m": {"const": 10},
+    "dtype": {"enum": ["float32", "uint8"]},
+    "nodata": {
+      "description": "\"nan\" for float32 composites, 255 for uint8 products.",
+      "oneOf": [{"const": "nan"}, {"const": 255}]
+    },
+    "bands": {
+      "description": "Band names in raster order (1-based band = index + 1).",
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "scene_ids": {
+      "description": "Earth Search sentinel-2-l2a item ids used, sorted.",
+      "type": "array",
+      "items": {"type": "string", "pattern": "^S2[ABC]_[0-9A-Z]{5}_[0-9]{8}_[0-9]+_L2A$"},
+      "uniqueItems": true
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "model", "classes_contract", "bands_contract"],
+      "properties": {
+        "code": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+        "package": {"type": "string", "description": "Producing package and its version, e.g. pipeline 0.1.0."},
+        "model": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,31}-[0-9A-Za-z._-]{1,32}$"}
+          ]
+        },
+        "classes_contract": {"type": "integer", "minimum": 1},
+        "bands_contract": {"type": "integer", "minimum": 1}
+      }
+    },
+    "parameters": {
+      "description": "Full resolved parameter set for the step; exactly what is hashed into the idempotency key.",
+      "type": "object"
+    },
+    "cloud_stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene_count", "mean_scene_cloud_pct", "valid_pixel_fraction"],
+      "properties": {
+        "scene_count": {"type": "integer", "minimum": 0},
+        "mean_scene_cloud_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "valid_pixel_fraction": {
+          "description": "Share of pixels inside the boundary that are not nodata.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "min_valid_observations": {"type": "integer", "minimum": 0}
+      }
+    },
+    "inputs": {
+      "description": "Idempotency keys of upstream products, sorted.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/sha256"},
+      "uniqueItems": true
+    },
+    "idempotency_key": {"$ref": "#/$defs/sha256"},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"kind": {"const": "composite"}}},
+      "then": {
+        "properties": {
+          "key": {"pattern": "^composites/"},
+          "dtype": {"const": "float32"},
+          "nodata": {"const": "nan"},
+          "bands": {"minItems": 18, "maxItems": 18},
+          "scene_ids": {"minItems": 1},
+          "versions": {"properties": {"model": {"type": "null"}}},
+          "inputs": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "classification"}}},
+      "then": {
+        "properties": {
+          "key": {"pattern": "^classifications/"},
+          "dtype": {"const": "uint8"},
+          "nodata": {"const": 255},
+          "bands": {"const": ["class"]},
+          "versions": {"properties": {"model": {"type": "string"}}},
+          "inputs": {"minItems": 1, "maxItems": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"kind": {"const": "change"}}},
+      "then": {
+        "required": ["change_pair"],
+        "properties": {
+          "key": {"pattern": "^changes/"},
+          "dtype": {"const": "uint8"},
+          "nodata": {"const": 255},
+          "bands": {"const": ["change"]},
+          "versions": {"properties": {"model": {"type": "string"}}},
+          "inputs": {"minItems": 2, "maxItems": 2}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "season": {
+      "type": "string",
+      "pattern": "^(spring|summer|autumn|winter|annual|w[0-9]{8}-[0-9]{8})$"
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["year", "season"],
+      "properties": {
+        "year": {"type": "integer", "minimum": 2015, "maximum": 2100},
+        "season": {"$ref": "#/$defs/season"}
+      }
+    }
+  }
+}

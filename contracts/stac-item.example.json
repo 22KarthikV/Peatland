@@ -1,0 +1,96 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/raster/v1.1.0/schema.json",
+    "https://stac-extensions.github.io/eo/v1.1.0/schema.json"
+  ],
+  "id": "composites.glen-trool.2025.w20250408-20250408",
+  "collection": "peatwatch-composites",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[
+      [-4.55, 55.05], [-4.30, 55.05], [-4.30, 55.30], [-4.55, 55.30], [-4.55, 55.05]
+    ]]
+  },
+  "bbox": [-4.55, 55.05, -4.30, 55.30],
+  "properties": {
+    "datetime": null,
+    "start_datetime": "2025-04-08T00:00:00Z",
+    "end_datetime": "2025-04-08T23:59:59Z",
+    "created": "2026-11-02T00:00:00Z",
+    "platform": "sentinel-2",
+    "constellation": "sentinel-2",
+    "eo:cloud_cover": 2.1,
+    "proj:code": "EPSG:32630",
+    "proj:shape": [2790, 1640],
+    "proj:transform": [10, 0, 400000, 0, -10, 6129000],
+    "peatwatch:kind": "composite",
+    "peatwatch:site": "glen-trool",
+    "peatwatch:year": 2025,
+    "peatwatch:season": "w20250408-20250408",
+    "peatwatch:idempotency_key": "0000000000000000000000000000000000000000000000000000000000000000",
+    "peatwatch:code_version": "8853f78",
+    "peatwatch:model_version": null
+  },
+  "links": [
+    {"rel": "self", "href": "s3://peatwatch-data/composites/glen-trool/2025/w20250408-20250408.stac.json", "type": "application/geo+json"},
+    {"rel": "collection", "href": "s3://peatwatch-data/collections/peatwatch-composites.json", "type": "application/json"},
+    {"rel": "derived_from", "href": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_30UVG_20250408_0_L2A", "type": "application/geo+json"}
+  ],
+  "assets": {
+    "data": {
+      "href": "s3://peatwatch-data/composites/glen-trool/2025/w20250408-20250408.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Composite, 12 S2 L2A bands + 6 features, float32",
+      "roles": ["data"],
+      "raster:bands": [
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "reflectance"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "index"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "index"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "index"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "m"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "degrees"},
+        {"data_type": "float32", "nodata": "nan", "spatial_resolution": 10, "unit": "index"}
+      ],
+      "eo:bands": [
+        {"name": "B01", "common_name": "coastal", "center_wavelength": 0.443},
+        {"name": "B02", "common_name": "blue", "center_wavelength": 0.490},
+        {"name": "B03", "common_name": "green", "center_wavelength": 0.560},
+        {"name": "B04", "common_name": "red", "center_wavelength": 0.665},
+        {"name": "B05", "common_name": "rededge", "center_wavelength": 0.705},
+        {"name": "B06", "common_name": "rededge", "center_wavelength": 0.740},
+        {"name": "B07", "common_name": "rededge", "center_wavelength": 0.783},
+        {"name": "B08", "common_name": "nir", "center_wavelength": 0.842},
+        {"name": "B8A", "common_name": "nir08", "center_wavelength": 0.865},
+        {"name": "B09", "common_name": "nir09", "center_wavelength": 0.945},
+        {"name": "B11", "common_name": "swir16", "center_wavelength": 1.610},
+        {"name": "B12", "common_name": "swir22", "center_wavelength": 2.190},
+        {"name": "ndvi"},
+        {"name": "ndwi"},
+        {"name": "ndmi"},
+        {"name": "elevation"},
+        {"name": "slope"},
+        {"name": "twi"}
+      ]
+    },
+    "sidecar": {
+      "href": "s3://peatwatch-data/composites/glen-trool/2025/w20250408-20250408.json",
+      "type": "application/json",
+      "title": "Provenance sidecar (contracts/sidecar.schema.json)",
+      "roles": ["metadata"]
+    }
+  }
+}
