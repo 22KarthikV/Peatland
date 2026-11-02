@@ -154,7 +154,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest ml/tests/test_metrics.py`
   - Files: `ml/src/ml/metrics.py`, test
   - Deps: M1
-- [ ] **M4 NDVI-threshold baseline and eval harness** | S | - | M
+- [x] **M4 NDVI-threshold baseline and eval harness** | S | - | M
   - Accept: rule-based classifier + harness producing metrics JSON on the test blocks.
   - Verify: `uv run pytest ml/tests/test_baseline_ndvi.py`
   - Files: `ml/src/ml/baseline_ndvi.py`, `evaluate.py`, test
