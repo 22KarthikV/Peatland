@@ -45,7 +45,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: orchestrator spot-checks 3 links/claims.
   - Files: `docs/labels/candidates.md`
   - Deps: none
-- [ ] **L2 Decide region, classes, demo site and date pair** | O | - | S
+- [x] **L2 Decide region, classes, demo site and date pair** | O | - | S
   - Do: pick training region (few hundred km2), held-out demo site, 3-4 classes mapped to label sources, date pair with real change; write the ADR; propose fallback.
   - Accept: ADR `docs/decisions/0003-site-and-classes.md`. (h) you confirm.
   - Verify: you approve in chat.
