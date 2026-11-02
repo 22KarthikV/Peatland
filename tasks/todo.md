@@ -96,7 +96,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest pipeline -k "config or cli"`
   - Files: `pipeline/pyproject.toml`, `pipeline/src/pipeline/{cli,config,log}.py`, tests
   - Deps: CP1
-- [ ] **P2 Indices and features** | S | B | S
+- [x] **P2 Indices and features** | S | B | S
   - Accept: NDVI, NDWI, moisture index, slope, topographic wetness proxy as pure float32 functions; NaN-safe; known-value tests.
   - Verify: `uv run pytest pipeline/tests/test_features.py`
   - Files: `pipeline/src/pipeline/features.py`, test
