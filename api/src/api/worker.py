@@ -282,6 +282,7 @@ class Worker:
 
     def _fail(self, run_id: uuid.UUID, code: str, message: str, detail: Any) -> None:
         error = {"code": code, "message": message, "detail": detail}
+        logger.warning("run failed run_id=%s code=%s", run_id, code)  # CloudWatch alarm filter
         with self.session_factory() as session:
             session.execute(
                 text(

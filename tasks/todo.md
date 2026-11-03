@@ -290,7 +290,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `terraform -chdir=infra validate`; `tflocal -chdir=infra apply -auto-approve`
   - Files: `infra/*.tf` (up to 5 files)
   - Deps: CP3
-- [ ] **I2 AWS-only resources (validate only)** | S | - | M
+- [x] **I2 AWS-only resources (validate only)** | S | - | M
   - Accept: ECS Fargate services, ALB, RDS PostGIS, ECR, CloudFront, Budgets, CloudWatch alarm on failed runs, defined and passing `validate` and `plan`; not applied to LocalStack.
   - Verify: `terraform -chdir=infra validate`; `plan` output saved.
   - Files: `infra/{ecs,rds,cdn,budget,alarms}.tf`
