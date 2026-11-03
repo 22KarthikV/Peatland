@@ -228,7 +228,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web test -- sites`
   - Files: `web/src/pages/{Sites,NewSite}.tsx`, components, tests
   - Deps: W1
-- [ ] **W3 Site map** | S | - | M
+- [x] **W3 Site map** | S | - | M
   - Accept: MapLibre base map (key-free source), boundary, classification layer via tile URL, date selector, opacity slider, always-visible colour-blind-safe legend, hover class name.
   - Verify: `npm --prefix web test -- map`
   - Files: `web/src/pages/SiteMap.tsx`, `components/{Legend,DateSelect}.tsx`, test
