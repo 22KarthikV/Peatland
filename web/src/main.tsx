@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { config } from "./config";
+import "./index.css";
 
 async function start() {
   if (config.useMocks) {

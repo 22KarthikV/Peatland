@@ -5,6 +5,7 @@ import type { components } from "../api/schema";
 import { DateSelect } from "../components/DateSelect";
 import { Legend } from "../components/Legend";
 import { MapView } from "../components/MapView";
+import { RunAnalysis } from "../components/RunAnalysis";
 import { fetchClassAt, type PointResult } from "../lib/tiles";
 
 type SiteDetail = components["schemas"]["SiteDetail"];
@@ -127,6 +128,7 @@ export function SiteMap() {
         onHover={onHover}
       />
       <Legend />
+      <RunAnalysis siteId={siteId} />
     </section>
   );
 }
