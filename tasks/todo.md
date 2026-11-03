@@ -255,7 +255,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
 ---
 ## Stage 4: Real model, E2E and infra
 
-- [ ] **M8 U-Net training script** | S (escalate to O) | A with I-tasks | M
+- [x] **M8 U-Net training script** | S (escalate to O) | A with I-tasks | M
   - Accept: config-driven, seeded; `segmentation_models_pytorch` U-Net with adapted first layer; CE+Dice with class weights; augmentation without colour jitter; MLflow logging; overfit-on-8-patches test; resumable checkpoints.
   - Verify: `uv run pytest ml/tests/test_train.py`
   - Files: `ml/src/ml/train.py`, `model.py`, `configs/unet.yaml`, test
