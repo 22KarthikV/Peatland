@@ -154,6 +154,15 @@ def test_assign_blocks_forced_and_errors() -> None:
         split_bounds([(0, 0, 1, 1)], CRS, buffer=-1)
 
 
+def test_forced_blocks_without_patches_do_not_use_the_test_quota() -> None:
+    blocks = [(i, j) for i in range(10) for j in range(10)]
+    far_forced = [(50, 50), (50, 51), (50, 52)]  # hold-out blocks with no patches
+    out = assign_blocks(blocks, forced_test=far_forced, seed=5)
+    assert all(out[b] == "test" for b in far_forced)
+    held_test = sum(v == "test" for b, v in out.items() if b in set(blocks))
+    assert held_test == 20 and sum(v == "val" for v in out.values()) == 20
+
+
 def test_split_dataset_matches_patch_bounds(tmp_path: Path) -> None:
     h = w = 1600  # 16 km at 10 m
     path = tmp_path / "comp.tif"
