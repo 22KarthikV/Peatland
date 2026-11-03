@@ -295,7 +295,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `terraform -chdir=infra validate`; `plan` output saved.
   - Files: `infra/{ecs,rds,cdn,budget,alarms}.tf`
   - Deps: I1
-- [ ] **I3 Terraform in CI and LocalStack smoke** | S | - | S
+- [x] **I3 Terraform in CI and LocalStack smoke** | S | - | S
   - Accept: CI runs `validate` and `plan`; script applies subset to LocalStack and checks outputs. No real AWS credentials anywhere; OIDC role documented, not used.
   - Verify: CI green; `scripts/smoke_infra.sh`
   - Files: `.github/workflows/infra.yml` (orchestrator edit), script
