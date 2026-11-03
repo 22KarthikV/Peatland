@@ -1,7 +1,7 @@
 """Queue worker (contracts/queue.md, db-schema.md section 4).
 
 Receive -> validate -> claim (compare-and-set) -> pipeline step -> inference step -> finish.
-The steps are injected callables; the real ones are wired after CP2. Run with
+The steps are injected callables; `main()` wires the real ones from `api.steps`. Run with
 `python -m api.worker`.
 """
 
@@ -297,15 +297,23 @@ def main() -> None:
 
     from api.db.session import make_session_factory
     from api.queue import SqsJobQueue
+    from api.steps import WorkerSteps, s3_client_from_settings
 
     logging.basicConfig(level=logging.INFO)
     settings = Settings()
     factory = make_session_factory()
+    steps = WorkerSteps(
+        lambda: factory(),
+        s3_client_from_settings(settings),
+        data_bucket=settings.data_bucket,
+        artifacts_bucket=settings.artifacts_bucket,
+    )
+    steps.register_baseline()
     worker = Worker(
         SqsJobQueue(settings),
         lambda: factory(),
-        _unwired("pipeline"),
-        _unwired("inference"),
+        steps.pipeline_step,
+        steps.inference_step,
     )
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
