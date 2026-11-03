@@ -87,6 +87,8 @@ services:
   web:
     build:
       context: web
+      args:
+        VITE_API_KEY: ${WEB_API_KEY:-dev-only-key}
     ports:
       - "5173:80"
     depends_on:

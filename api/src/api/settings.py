@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     api_keys: str = ""
     # Optional Secrets Manager secret of comma-separated plaintext keys (hashed on load).
     api_key_secret_id: str = ""
+    # Comma-separated browser origins allowed to call the API (the web app).
+    cors_origins: str = "http://localhost:5173"
     rate_limit_job_per_minute: int = Field(default=10, ge=1)
     rate_limit_default_per_minute: int = Field(default=120, ge=1)
 

@@ -33,3 +33,22 @@ def test_generated_paths_are_subset_of_contract() -> None:
     assert set(generated) <= set(spec["paths"])
     for path, ops in generated.items():
         assert set(ops) <= set(spec["paths"][path])
+
+
+def test_cors_preflight_allows_web_origin() -> None:
+    from fastapi.testclient import TestClient
+
+    from api.main import create_app
+    from api.settings import Settings
+
+    client = TestClient(create_app(Settings(cors_origins="http://localhost:5173")))
+    r = client.options(
+        "/sites",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "x-api-key",
+        },
+    )
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:5173"
