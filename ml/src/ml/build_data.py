@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 import urllib.error
@@ -913,6 +914,8 @@ def load_label_sources(
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # Sentinel-2 COGs on AWS Earth Search are public; read them without credentials.
+    os.environ.setdefault("AWS_NO_SIGN_REQUEST", "YES")
     try:
         regions = resolve_regions(args)
         start, end = args.window
