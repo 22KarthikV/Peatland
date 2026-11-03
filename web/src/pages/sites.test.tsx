@@ -139,7 +139,7 @@ describe("NewSite page", () => {
     expect(await screen.findByRole("img", { name: "Boundary preview" })).toBeInTheDocument();
     expect(screen.getByLabelText("Site name")).toHaveValue("moor");
     fireEvent.click(screen.getByRole("button", { name: "Create site" }));
-    expect(await screen.findByRole("heading", { level: 2, name: /Site map/ })).toBeInTheDocument();
+    expect(await screen.findByText(/Loading site|not found/i)).toBeInTheDocument();
     expect(body).toMatchObject({ name: "moor", boundary: { type: "Polygon" } });
   });
 

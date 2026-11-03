@@ -67,4 +67,12 @@ export const handlers = [
   ),
 ];
 
+// TiTiler point lookup (no API key). The mock always reports class 1 (bog).
+handlers.push(
+  http.get("*/cog/point/:coords", ({ params }) => {
+    const [lon, lat] = String(params.coords).split(",").map(Number);
+    return HttpResponse.json({ coordinates: [lon, lat], values: [1], band_names: ["b1"] });
+  }),
+);
+
 export { changesCreate202 };
