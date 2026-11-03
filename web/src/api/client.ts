@@ -17,7 +17,11 @@ export function apiKeyMiddleware(apiKey: string): Middleware {
 }
 
 export function createApiClient(cfg: Pick<AppConfig, "apiBaseUrl" | "apiKey"> = defaultConfig) {
-  const client = createClient<paths>({ baseUrl: cfg.apiBaseUrl });
+  const client = createClient<paths>({
+    baseUrl: cfg.apiBaseUrl,
+    // Resolve fetch per call so test servers (MSW) that patch globalThis.fetch are honoured.
+    fetch: (request) => globalThis.fetch(request),
+  });
   client.use(apiKeyMiddleware(cfg.apiKey));
   return client;
 }

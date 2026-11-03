@@ -223,7 +223,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web run lint ; npm --prefix web run typecheck ; npm --prefix web test`
   - Files: `web/*` config, `web/src/api/*`, `web/src/mocks/*`
   - Deps: CP1
-- [ ] **W2 Sites list and new site** | S | - | M
+- [x] **W2 Sites list and new site** | S | - | M
   - Accept: list with search, empty/loading/error states; upload GeoJSON with validation, preview, submit.
   - Verify: `npm --prefix web test -- sites`
   - Files: `web/src/pages/{Sites,NewSite}.tsx`, components, tests
