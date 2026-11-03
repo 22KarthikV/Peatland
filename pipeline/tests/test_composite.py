@@ -236,6 +236,17 @@ def test_build_composite_end_to_end(tmp_path: Path, grid: Grid) -> None:
     assert not np.isnan(comp).any()
 
 
+def test_build_composite_strips_match_whole_grid(tmp_path: Path, grid: Grid) -> None:
+    scenes = [
+        _scene(tmp_path, grid, "s1", (1000, 1000), 4),
+        _scene(tmp_path, grid, "s2", (2000, 2000), 5),
+    ]
+    whole, cov_whole = build_composite(scenes, grid, band_names=BANDS, strip_rows=grid.height)
+    strips, cov_strips = build_composite(scenes, grid, band_names=BANDS, strip_rows=3)
+    assert np.array_equal(whole, strips, equal_nan=True)
+    assert np.array_equal(cov_whole, cov_strips)
+
+
 def test_build_composite_no_scenes(grid: Grid) -> None:
     comp, cov = build_composite([], grid, band_names=BANDS)
     assert np.isnan(comp).all() and (cov == 0).all()

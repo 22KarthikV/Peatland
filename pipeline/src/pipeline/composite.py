@@ -12,6 +12,7 @@ import rasterio
 import yaml
 from numpy.typing import NDArray
 from rasterio.enums import Resampling
+from rasterio.transform import Affine
 from rasterio.warp import reproject
 
 from pipeline.grid import Grid
@@ -115,16 +116,41 @@ def build_composite(
     scenes: Sequence[tuple[Mapping[str, str], str]],
     grid: Grid,
     band_names: Sequence[str] | None = None,
+    strip_rows: int | None = None,
+    max_strip_bytes: int = 3 * 1024**3,
 ) -> tuple[NDArray[np.float32], NDArray[np.uint16]]:
-    """Read every (band_hrefs, scl_href) scene onto ``grid`` and composite."""
+    """Read every (band_hrefs, scl_href) scene onto ``grid`` and composite.
+
+    Rows are processed in strips (``strip_rows``, or sized from ``max_strip_bytes``);
+    the result is identical to compositing the whole grid at once.
+    """
     names = list(band_names) if band_names is not None else load_s2_bands()[0]
-    data: list[NDArray[np.float32]] = []
-    masks: list[NDArray[np.bool_]] = []
-    for hrefs, scl in scenes:
-        b, m = read_scene(hrefs, scl, grid, band_names=names)
-        data.append(b)
-        masks.append(m)
-    if not data:
+    if not scenes:
         empty = np.empty((0, len(names), *grid.shape), dtype=np.float32)
         return median_composite(empty, np.empty((0, *grid.shape), dtype=bool))
-    return median_composite(np.stack(data), np.stack(masks))
+    # The median needs every scene at once, so work in row strips to bound memory
+    # (stack + masked copy + nanmedian temporaries are about 3x the stack size).
+    per_row = len(scenes) * len(names) * grid.width * 4 * 3
+    rows = grid.height if strip_rows is None else strip_rows
+    if strip_rows is None:
+        rows = max(16, min(grid.height, int(max_strip_bytes // max(per_row, 1))))
+    comp = np.empty((len(names), *grid.shape), dtype=np.float32)
+    coverage = np.empty(grid.shape, dtype=np.uint16)
+    for y0 in range(0, grid.height, rows):
+        h = min(rows, grid.height - y0)
+        sub = Grid(
+            transform=grid.transform * Affine.translation(0, y0),
+            width=grid.width,
+            height=h,
+            crs=grid.crs,
+        )
+        data: list[NDArray[np.float32]] = []
+        masks: list[NDArray[np.bool_]] = []
+        for hrefs, scl in scenes:
+            b, m = read_scene(hrefs, scl, sub, band_names=names)
+            data.append(b)
+            masks.append(m)
+        comp[:, y0 : y0 + h], coverage[y0 : y0 + h] = median_composite(
+            np.stack(data), np.stack(masks)
+        )
+    return comp, coverage
