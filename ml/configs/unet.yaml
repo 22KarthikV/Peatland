@@ -1,0 +1,55 @@
+# U-Net training config (M8). Run from the repo root:
+#   python -m ml.train --config ml/configs/unet.yaml [--out-dir DIR] [--epochs N] [--no-resume]
+# Relative paths resolve against the working directory. Unknown keys are an error.
+seed: 42
+
+data:
+  sources:                      # composite COG + labels on the same grid; add one entry per scene
+    - composite: data/composites/train.tif
+      labels: data/labels/train_labels.tif   # uint8 class ids (255 = unlabelled), or .geojson/.gpkg
+      label_class_column: class              # vector labels only
+  patch_size: 256
+  stride: null                  # null = patch_size (no overlap)
+  min_labelled_fraction: 0.05   # train patches with fewer labelled pixels are skipped
+  split:                        # must match the evaluation split (ml.split defaults)
+    block_size: 5000.0          # metres
+    buffer: 1000.0              # metres
+    fractions: [0.6, 0.2, 0.2]  # train / val / test blocks
+    seed: 0
+    holdout_bboxes_wgs84:       # forced to test, never trained on (Glen Trool demo burn, ADR 0003)
+      - [-4.55, 55.05, -4.30, 55.30]
+
+model:
+  encoder_name: resnet34
+  encoder_weights: null         # "imagenet" on Colab (downloads weights; first conv adapted to 18 bands)
+  encoder_depth: 5
+  decoder_channels: [256, 128, 64, 32, 16]
+  in_channels: 18
+  classes: 4
+
+train:
+  epochs: 50
+  batch_size: 8
+  lr: 0.001
+  weight_decay: 0.0001
+  num_workers: 2
+  device: auto                  # auto = cuda if available, else cpu
+  amp: true                     # CUDA only
+  class_weights: auto           # auto (inverse frequency on train), null, or a list of 4 floats
+  class_weight_max: 50.0
+  ce_weight: 1.0
+  dice_weight: 1.0
+  augment:                      # geometric only; no colour/band jitter
+    hflip: true
+    vflip: true
+    rot90: true
+
+output:
+  dir: artifacts/unet           # last.pt, best.pt, split.json, config.json, mlflow.db
+  resume: true                  # continue from <dir>/last.pt if present
+
+mlflow:
+  enabled: true
+  tracking_uri: null            # null = sqlite:///<output.dir>/mlflow.db
+  experiment: peatwatch-unet
+  run_name: null
