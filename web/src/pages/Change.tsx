@@ -5,6 +5,7 @@ import type { components } from "../api/schema";
 import { DateSelect } from "../components/DateSelect";
 import { Legend } from "../components/Legend";
 import { MapView, type Camera } from "../components/MapView";
+import { StatsPanel } from "../components/StatsPanel";
 
 type SiteDetail = components["schemas"]["SiteDetail"];
 type Classification = components["schemas"]["Classification"];
@@ -287,6 +288,7 @@ export function Change() {
           </div>
         </section>
       )}
+      {stats && <StatsPanel stats={stats} />}
     </section>
   );
 }
