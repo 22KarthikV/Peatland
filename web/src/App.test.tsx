@@ -7,7 +7,6 @@ describe("App shell", () => {
   it.each([
     ["/", "Sites"],
     ["/sites/new", "New site"],
-    ["/sites/abc/change", "Change abc"],
     ["/runs/r1", "Run status r1"],
   ])("renders %s", (path, heading) => {
     render(

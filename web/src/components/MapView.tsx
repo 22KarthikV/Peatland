@@ -14,18 +14,34 @@ export interface MapViewProps {
   boundary: { type: string; coordinates?: unknown } | null;
   tileUrl: string | null;
   opacity: number;
-  onHover: (pos: { lng: number; lat: number } | null) => void;
+  onHover?: (pos: { lng: number; lat: number } | null) => void;
+  /** Shared camera for synchronised views. Applied with jumpTo when it differs from the map's own. */
+  camera?: Camera;
+  /** Called with the new camera when the user (not code) moves this map. */
+  onCameraChange?: (camera: Camera) => void;
+  /** False makes the map ignore the pointer (used for the clipped overlay in swipe mode). */
+  interactive?: boolean;
+  label?: string;
+}
+
+export interface Camera {
+  center: [number, number];
+  zoom: number;
+  bearing: number;
+  pitch: number;
 }
 
 /** Thin MapLibre wrapper. Everything else on the page is plain React and tested without the map. */
-export function MapView({ boundary, tileUrl, opacity, onHover }: MapViewProps) {
+export function MapView({ boundary, tileUrl, opacity, onHover, camera, onCameraChange, interactive = true, label = "Site map" }: MapViewProps) {
   const box = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const hoverRef = useRef(onHover);
   const opacityRef = useRef(opacity);
+  const cameraCbRef = useRef(onCameraChange);
   useEffect(() => {
     hoverRef.current = onHover;
     opacityRef.current = opacity;
+    cameraCbRef.current = onCameraChange;
   });
   const [ready, setReady] = useState(false);
 
@@ -52,8 +68,13 @@ export function MapView({ boundary, tileUrl, opacity, onHover }: MapViewProps) {
     mapRef.current = map;
     map.addControl(new NavigationControl(), "top-right");
     map.on("load", () => setReady(true));
-    map.on("mousemove", (e: MapMouseEvent) => hoverRef.current({ lng: e.lngLat.lng, lat: e.lngLat.lat }));
-    map.on("mouseout", () => hoverRef.current(null));
+    map.on("mousemove", (e: MapMouseEvent) => hoverRef.current?.({ lng: e.lngLat.lng, lat: e.lngLat.lat }));
+    map.on("mouseout", () => hoverRef.current?.(null));
+    map.on("move", (e: { originalEvent?: unknown }) => {
+      if (!e.originalEvent || !cameraCbRef.current) return;
+      const c = map.getCenter();
+      cameraCbRef.current({ center: [c.lng, c.lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() });
+    });
     return () => {
       setReady(false);
       map.remove();
@@ -115,5 +136,27 @@ export function MapView({ boundary, tileUrl, opacity, onHover }: MapViewProps) {
     }
   }, [ready, opacity, tileUrl, boundary]);
 
-  return <div ref={box} role="application" aria-label="Site map" style={{ width: "100%", height: 480 }} />;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !camera) return;
+    const c = map.getCenter();
+    if (
+      Math.abs(c.lng - camera.center[0]) < 1e-9 &&
+      Math.abs(c.lat - camera.center[1]) < 1e-9 &&
+      Math.abs(map.getZoom() - camera.zoom) < 1e-9 &&
+      map.getBearing() === camera.bearing &&
+      map.getPitch() === camera.pitch
+    )
+      return;
+    map.jumpTo(camera);
+  }, [ready, camera]);
+
+  return (
+    <div
+      ref={box}
+      role="application"
+      aria-label={label}
+      style={{ width: "100%", height: 480, pointerEvents: interactive ? undefined : "none" }}
+    />
+  );
 }
