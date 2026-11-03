@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import threading
+import time
 import uuid
 from collections.abc import Callable, Mapping
 from contextlib import AbstractContextManager
@@ -21,6 +22,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from api.queue import JobConsumer, QueueMessage
+from api.reaper import reap_stale_runs
 from api.settings import Settings
 from api.step_types import StepContext, StepError
 
@@ -62,6 +64,8 @@ class Worker:
         heartbeat_interval: float = 60.0,
         stale_after: float = 300.0,
         wait_seconds: int = 20,
+        reap_interval: float | None = None,
+        reap_stale_after: float = 900.0,
     ) -> None:
         self.consumer = consumer
         self.session_factory = session_factory
@@ -73,11 +77,33 @@ class Worker:
         self.heartbeat_interval = heartbeat_interval
         self.stale_after = stale_after
         self.wait_seconds = wait_seconds
+        # None disables the reaper (the default for tests); main() wires it from Settings.
+        self.reap_interval = reap_interval
+        self.reap_stale_after = reap_stale_after
+        self._last_reap: float | None = None
 
     # ---- loop ------------------------------------------------------------------------------
 
+    def reap_if_due(self) -> list[uuid.UUID]:
+        """Run the stale-run reaper at most every `reap_interval` s; never raises."""
+        if self.reap_interval is None:
+            return []
+        now = time.monotonic()
+        if self._last_reap is not None and now - self._last_reap < self.reap_interval:
+            return []
+        self._last_reap = now
+        try:
+            with self.session_factory() as session:
+                ids = reap_stale_runs(session.connection(), self.reap_stale_after)
+                session.commit()
+            return ids
+        except Exception:
+            logger.exception("stale-run reaper failed")
+            return []
+
     def poll_once(self) -> int:
         """Receive one batch and process it; returns the number of messages received."""
+        self.reap_if_due()
         messages = self.consumer.receive(self.wait_seconds, 1)
         for message in messages:
             try:
@@ -296,6 +322,8 @@ def main() -> None:
         lambda: factory(),
         steps.pipeline_step,
         steps.inference_step,
+        reap_interval=settings.reaper_interval_s,
+        reap_stale_after=settings.reaper_stale_after_s,
     )
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
