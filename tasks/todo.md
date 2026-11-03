@@ -250,7 +250,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Deps: W5
 
 ### Checkpoint 3 (gate)
-- [ ] Walking skeleton works locally: upload boundary -> run (baseline "model") -> map -> change stats; `docker compose up` brings it all up; coverage >= 70%; you review it in the browser.
+- [x] Walking skeleton works locally: upload boundary -> run (baseline "model") -> map -> change stats; `docker compose up` brings it all up; coverage >= 70%; you review it in the browser.
 
 ---
 ## Stage 4: Real model, E2E and infra
