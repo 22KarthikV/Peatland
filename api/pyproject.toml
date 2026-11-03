@@ -17,6 +17,19 @@ dependencies = [
     "uvicorn[standard]>=0.54.0",
 ]
 
+[project.optional-dependencies]
+# The worker runs the real pipeline and models (api.steps); the API image does not need them.
+worker = [
+    "numpy>=2.5.4",
+    "peatwatch-ml",
+    "peatwatch-pipeline",
+    "rasterio>=1.5.2",
+]
+
+[tool.uv.sources]
+peatwatch-ml = { workspace = true }
+peatwatch-pipeline = { workspace = true }
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
