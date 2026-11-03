@@ -238,7 +238,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web test -- change`
   - Files: `web/src/pages/Change.tsx`, components, test
   - Deps: W3
-- [ ] **W5 Statistics panel** | S | - | M
+- [x] **W5 Statistics panel** | S | - | M
   - Accept: area per class/transition in ha and %, sortable table, Recharts bar chart, CSV download.
   - Verify: `npm --prefix web test -- stats`
   - Files: `web/src/components/Stats*.tsx`, test
