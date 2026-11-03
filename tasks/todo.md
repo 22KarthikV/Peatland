@@ -211,7 +211,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `uv run pytest api/tests/test_changes.py`
   - Files: `api/src/api/routes/{classifications,changes}.py`, test
   - Deps: A6, M7 (mock until then)
-- [ ] **A8 TiTiler service** | S | - | S
+- [x] **A8 TiTiler service** | S | - | S
   - Accept: TiTiler in compose reads COGs from LocalStack; colormap renders classification; CORS set for the web origin.
   - Verify: `curl` a tile returns 200 PNG; `scripts/smoke_tiles.sh`
   - Files: `docker-compose.yml` (orchestrator edit), `infra/titiler/config`, script
