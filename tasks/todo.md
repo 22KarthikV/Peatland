@@ -233,7 +233,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web test -- map`
   - Files: `web/src/pages/SiteMap.tsx`, `components/{Legend,DateSelect}.tsx`, test
   - Deps: W2
-- [ ] **W4 Change view** | S | - | M
+- [x] **W4 Change view** | S | - | M
   - Accept: pick two dates, side-by-side or swipe, change layer toggle, click transition for detail.
   - Verify: `npm --prefix web test -- change`
   - Files: `web/src/pages/Change.tsx`, components, test
