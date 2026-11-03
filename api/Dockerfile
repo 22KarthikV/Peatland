@@ -15,6 +15,8 @@ COPY ml/pyproject.toml ml/pyproject.toml
 RUN mkdir -p api/src/api pipeline/src/pipeline ml/src/ml \
     && uv sync --frozen --no-dev --package peatwatch-api --no-install-workspace
 COPY api/src api/src
+COPY api/alembic api/alembic
+COPY api/alembic.ini api/alembic.ini
 RUN uv sync --frozen --no-dev --package peatwatch-api
 
 RUN useradd --system --no-create-home app

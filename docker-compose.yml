@@ -52,6 +52,46 @@ services:
       localstack:
         condition: service_healthy
 
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    command: ["sh", "-c", "alembic -c api/alembic.ini upgrade head && uvicorn api.main:app --host 0.0.0.0 --port 8000"]
+    environment: &api-env
+      DATABASE_URL: postgresql+psycopg://peatwatch:peatwatch@postgis:5432/peatwatch
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      API_KEY_SECRET_ID: peatwatch/api-key
+      TITILER_BASE_URL: http://localhost:8001
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: api/Dockerfile.worker
+    environment: *api-env
+    depends_on:
+      postgis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  web:
+    build:
+      context: web
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
 volumes:
   postgis-data:
   localstack-data:
