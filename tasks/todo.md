@@ -243,7 +243,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web test -- stats`
   - Files: `web/src/components/Stats*.tsx`, test
   - Deps: W4
-- [ ] **W6 Run status and accessibility pass** | S | - | M
+- [x] **W6 Run status and accessibility pass** | S | - | M
   - Accept: progress view auto-refresh, retry on failure; keyboard reachable, visible focus, labels; axe checks pass.
   - Verify: `npm --prefix web test -- run` and axe test
   - Files: `web/src/pages/RunStatus.tsx`, a11y test
