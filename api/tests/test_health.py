@@ -36,10 +36,9 @@ def test_generated_paths_are_subset_of_contract() -> None:
 
 
 def test_cors_preflight_allows_web_origin() -> None:
-    from fastapi.testclient import TestClient
-
     from api.main import create_app
     from api.settings import Settings
+    from fastapi.testclient import TestClient
 
     client = TestClient(create_app(Settings(cors_origins="http://localhost:5173")))
     r = client.options(
