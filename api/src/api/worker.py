@@ -13,7 +13,6 @@ import threading
 import uuid
 from collections.abc import Callable, Mapping
 from contextlib import AbstractContextManager
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from api.queue import JobConsumer, QueueMessage
 from api.settings import Settings
+from api.step_types import StepContext, StepError
 
 logger = logging.getLogger(__name__)
 
@@ -30,24 +30,6 @@ SCHEMA_ENV = "QUEUE_SCHEMA_PATH"
 DEFAULT_SCHEMA = Path(__file__).resolve().parents[3] / "contracts" / "queue.schema.json"
 MAX_RECEIVE_COUNT = 3
 VISIBILITY_SECONDS = 900
-
-
-class StepError(Exception):
-    """A handled failure: the run goes to `failed` with this error and the message is deleted."""
-
-    def __init__(self, code: str, message: str, detail: Any = None) -> None:
-        super().__init__(message)
-        self.code = code
-        self.message = message
-        self.detail = detail
-
-
-@dataclass(frozen=True)
-class StepContext:
-    run_id: uuid.UUID
-    site_id: uuid.UUID
-    message: Mapping[str, Any]
-    outputs: Mapping[str, Any]  # outputs of earlier steps
 
 
 Step = Callable[[StepContext], Mapping[str, Any]]

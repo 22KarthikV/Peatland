@@ -58,7 +58,7 @@ from sqlalchemy.orm import Session
 
 from api.db.models import Change, Classification, Composite
 from api.settings import Settings
-from api.worker import StepContext, StepError
+from api.step_types import StepContext, StepError
 
 logger = logging.getLogger(__name__)
 

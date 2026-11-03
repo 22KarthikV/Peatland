@@ -385,3 +385,11 @@ def test_heartbeat_thread_runs_during_steps(
     w.poll_once()
     assert beats.is_set() and queue.visibility_extensions
     assert row(session, run).status == "succeeded"
+
+
+def test_step_error_is_one_class_when_worker_runs_as_main() -> None:
+    """`python -m api.worker` makes the worker module `__main__`; StepError must not live there."""
+    from api import steps, worker
+
+    assert worker.StepError is steps.StepError
+    assert worker.StepError.__module__ == "api.step_types"
