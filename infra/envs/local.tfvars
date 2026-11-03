@@ -6,3 +6,6 @@ use_localstack      = true
 localstack_endpoint = "http://localhost:4566"
 name_suffix         = "-tf"
 enable_iam          = false
+
+# AWS-only resources (ecs/rds/cdn/budget/alarms .tf) must never reach LocalStack.
+enable_aws_only = false
