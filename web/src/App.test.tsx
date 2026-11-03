@@ -7,7 +7,7 @@ describe("App shell", () => {
   it.each([
     ["/", "Sites"],
     ["/sites/new", "New site"],
-    ["/runs/r1", "Run status r1"],
+    ["/runs/r1", "Run status"],
   ])("renders %s", (path, heading) => {
     render(
       <MemoryRouter initialEntries={[path]}>

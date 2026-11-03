@@ -8,13 +8,16 @@ import { Sites } from "./pages/Sites";
 export function App() {
   return (
     <>
+      <a className="skip-link" href="#main">
+        Skip to main content
+      </a>
       <header>
         <h1>PeatWatch</h1>
         <nav aria-label="Main">
           <NavLink to="/sites">Sites</NavLink> <NavLink to="/sites/new">New site</NavLink>
         </nav>
       </header>
-      <main>
+      <main id="main" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Navigate to="/sites" replace />} />
           <Route path="/sites" element={<Sites />} />

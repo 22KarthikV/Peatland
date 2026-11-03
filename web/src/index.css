@@ -1,0 +1,76 @@
+:root {
+  --fg: #1a1a1a;
+  --bg: #ffffff;
+  --link: #0b4f9c;
+  --focus: #b35900;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+header,
+main {
+  padding: 8px 16px;
+}
+
+header {
+  border-bottom: 1px solid #767676;
+}
+
+a {
+  color: var(--link);
+}
+
+nav a[aria-current="page"] {
+  font-weight: 700;
+}
+
+/* Visible keyboard focus on every interactive element. */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -100px;
+  padding: 8px 12px;
+  background: var(--bg);
+  color: var(--link);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+main:focus {
+  outline: none;
+}
+
+[role="alert"] {
+  color: #8a1c1c;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #767676;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
