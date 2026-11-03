@@ -285,7 +285,7 @@ Every task: write a handoff in `tasks/handoffs/<id>.md`, keep lint, type-check a
   - Verify: `npm --prefix web run e2e`
   - Files: `web/e2e/*`, `docs/usability.md`
   - Deps: A9
-- [ ] **I1 Terraform core resources** | S | A with ML | M
+- [x] **I1 Terraform core resources** | S | A with ML | M
   - Accept: providers, S3 state backend, dev/prod folders, buckets with lifecycle, SQS, Secrets Manager, least-privilege IAM; applies to LocalStack via `tflocal`. (h) approve installing Terraform and tflocal.
   - Verify: `terraform -chdir=infra validate`; `tflocal -chdir=infra apply -auto-approve`
   - Files: `infra/*.tf` (up to 5 files)
