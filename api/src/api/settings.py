@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     rate_limit_job_per_minute: int = Field(default=10, ge=1)
     rate_limit_default_per_minute: int = Field(default=120, ge=1)
 
+    # Stale-run reaper (queue.md item 3): fail `running` runs with no heartbeat for this long.
+    reaper_stale_after_s: float = Field(default=900.0, gt=0)
+    # How often the worker's poll loop runs the reaper.
+    reaper_interval_s: float = Field(default=60.0, gt=0)
+
     @property
     def api_key_hashes(self) -> frozenset[str]:
         return frozenset(h.strip().lower() for h in self.api_keys.split(",") if h.strip())
