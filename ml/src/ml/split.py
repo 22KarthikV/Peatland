@@ -124,18 +124,21 @@ def assign_blocks(
     if len(fractions) != 3 or any(f < 0 for f in fractions) or sum(fractions) <= 0:
         raise ValueError(f"fractions must be three non-negative numbers, got {fractions!r}")
     total = float(sum(fractions))
-    all_blocks = sorted(set(blocks) | set(forced_test))
+    held = set(blocks)  # blocks that hold patches: only these count towards the quotas
     forced = sorted(set(forced_test))
-    n = len(all_blocks)
+    # A forced block without patches (e.g. most of the demo box when training elsewhere) is still
+    # assigned 'test' (the buffer check needs it) but must not use up the test quota.
+    n = len(held)
     n_val = round(n * fractions[1] / total)
     n_test = round(n * fractions[2] / total)
 
     out: dict[BlockId, Split] = {b: "test" for b in forced}
-    free = [b for b in all_blocks if b not in out]
+    free = sorted(b for b in held if b not in out)
     order = np.random.default_rng(seed).permutation(len(free))
     shuffled = [free[i] for i in order]
     n_val = min(n_val, len(shuffled))
-    n_test_extra = min(max(0, n_test - len(forced)), len(shuffled) - n_val)
+    n_forced_held = len(held & set(forced))
+    n_test_extra = min(max(0, n_test - n_forced_held), len(shuffled) - n_val)
     for k, b in enumerate(shuffled):
         if k < n_val:
             out[b] = "val"

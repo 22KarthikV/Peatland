@@ -19,6 +19,7 @@ import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import rasterio
+import shapely
 import yaml
 from rasterio.crs import CRS
 from rasterio.features import rasterize
@@ -114,7 +115,7 @@ def rasterize_labels(
         if geom is None or geom.is_empty:
             continue
         if not geom.is_valid:
-            geom = geom.make_valid()
+            geom = shapely.make_valid(geom)
             if geom.is_empty:
                 continue
         shapes.append((geom, cid))
